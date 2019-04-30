@@ -1,0 +1,147 @@
+name: sway
+base: core18 # the base snap is the execution environment for this snap
+version: '1.0' # just for humans, typically '1.2+git' or '1.3.2'
+summary: SWAY Wayland tiling window manager desktop
+description: |
+  SWAY is a i3-compatible Wayland compositor 
+  This snap is tested on ubuntu 
+grade: devel # must be 'stable' to release into candidate/stable channels
+confinement: devmode # use 'strict' once you have the right plugs and slots
+
+parts:
+  wayland-protocols: # TODO: check weston version of disco release
+    after: [ json-c ]
+    source: https://github.com/wayland-project/wayland-protocols.git
+    source-tag: '1.17'
+    plugin: autotools
+    configflags: [ --prefix=/usr ]
+    build-packages:
+      - pkgconf
+      - cmake
+      - gcc
+      - g++
+      - meson
+      - ninja-build
+      - libgtk-3-dev
+      - gtk-doc-tools
+      - gnutls-bin 
+      - valac
+      - intltool
+      - libpcre2-dev
+      - libglib3.0-cil-dev 
+      - libgnutls28-dev 
+      - libgirepository1.0-dev
+      - libxml2-utils
+      - gperf
+      - build-essential
+      #
+      - gir1.2-colord-1.0
+      - libcolord-dev 
+      - libjpeg-dev
+      - libjpeg-turbo8-dev
+      - libjpeg8-dev
+      - liblcms2-dev
+      - libvpx-dev
+      - quilt
+      #
+      - libwayland-dev
+      - libinput-dev
+      - libcap-dev
+      # - wayland-protocols ## TODO: on 19.04 there is the correct version
+      - libegl1-mesa-dev
+      - libgles2-mesa-dev
+      - libdrm-dev
+      - libgbm-dev
+      - libxkbcommon-dev
+      - libudev-dev
+      - libpixman-1-dev
+      - libxcb-composite0-dev
+      - libxcb-xfixes0-dev
+      - libxcb-image0-dev
+      - libxcb-render0-dev
+      - libx11-xcb-dev
+  json-c:
+    source: https://github.com/json-c/json-c.git
+    # source-tag: json-c-0.13.1-20180305
+    plugin: autotools
+    configflags: [ --prefix=/usr ]
+    build-packages:
+      - cmake
+      - clang
+      - build-essential
+      - doxygen
+      - autoconf
+      - automake-1.15
+      - libtool
+  wlroots:
+    after: [ json-c,wayland-protocols ]
+    source: https://github.com/swaywm/wlroots.git
+    source-tag: '0.5.0'
+    plugin: meson
+    meson-parameters: [ --prefix=/usr ]
+    build-packages: ## TODO: find out the needed dependencies !
+      - pkgconf
+      - cmake
+      - g++
+      - libgtk-3-dev
+      - gtk-doc-tools
+      - gnutls-bin
+      - valac
+      - intltool
+      - libpcre2-dev
+      - libglib3.0-cil-dev
+      - libgnutls28-dev
+      - libgirepository1.0-dev
+      - libxml2-utils
+      - gperf
+      - build-essential
+      # - libweston-5-dev
+      - libfontconfig1-dev
+      - libfreetype6-dev
+      - libxrender-dev
+      - libx11-dev
+      - libxext-dev
+      - libpng-dev
+      - libsm-dev
+      - xutils-dev
+      - libxt-dev
+      - libpixman-1-dev
+      - libxcb1-dev
+      - libxcb-render0-dev
+      - libxcb-shm0-dev
+      - zlib1g-dev
+      - liblzo2-dev
+  sway:
+    after: [ json-c,wlroots ] 
+    source: https://github.com/swaywm/sway.git
+    source-tag: '1.0'
+    plugin: meson
+    meson-parameters: [ --prefix=/usr ]
+    build-packages:
+      - libsystemd0
+      - libsystemd-dev
+      # - scdoc
+      - ctags
+      - libavutil-dev
+      - libavcodec-dev
+      - libavformat-dev
+    stage-packages:
+      - libegl1
+      - libx11-6
+      - weston ## TODO: only some dependencies are needed
+      - libgdk-pixbuf2.0-0
+#   swaybg:
+#     after: [ wlroots,sway ]
+#     source: https://github.com/swaywm/swaybg.git
+#     #source-tag: '1.0'
+#     plugin: meson
+#     meson-parameters: [ --prefix=/usr ]
+#     build-packages:
+#       - libsystemd-dev
+#   swaylock:
+#     after: [ wlroots,sway ]
+#     source: https://github.com/swaywm/swaylock.git
+#     source-tag: '1.0'
+#     plugin: meson
+#     meson-parameters: [ --prefix=/usr ]
+
