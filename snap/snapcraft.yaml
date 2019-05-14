@@ -169,3 +169,13 @@ parts:
       - libxext6
       - libxkbcommon0
       - libxrender1
+
+    override-build: |
+      set -eux
+      snapcraftctl build
+      setcap "cap_sys_ptrace,cap_sys_tty_config=eip" $SNAPCRAFT_PART_INSTALL/usr/bin/sway
+    install: |
+      set -eux
+      snapcraftctl build
+      setcap "cap_sys_ptrace,cap_sys_tty_config=eip" $SNAP/usr/bin/sway
+
