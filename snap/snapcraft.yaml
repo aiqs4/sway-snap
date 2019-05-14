@@ -130,6 +130,13 @@ parts:
       - libx11-6
       - weston ## TODO: only some dependencies are needed
       - libgdk-pixbuf2.0-0
+  setcap:
+    plugin: nil
+    after: [sway]
+    override-build: |
+      setcap "cap_sys_ptrace,cap_sys_tty_config=eip" /usr/bin/sway
+
+
 #   swaybg:
 #     after: [ wlroots,sway ]
 #     source: https://github.com/swaywm/swaybg.git
@@ -144,4 +151,3 @@ parts:
 #     source-tag: '1.0'
 #     plugin: meson
 #     meson-parameters: [ --prefix=/usr ]
-
