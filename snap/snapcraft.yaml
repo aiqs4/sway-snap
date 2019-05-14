@@ -133,8 +133,11 @@ parts:
   setcap:
     plugin: nil
     after: [sway]
+    build-packages:
+      - libcap2-bin
     override-build: |
-      setcap "cap_sys_ptrace,cap_sys_tty_config=eip" /usr/bin/sway
+      snapcraftctl build
+      setcap "cap_sys_ptrace,cap_sys_tty_config=eip" /root/stage/usr/bin/sway
 
 
 #   swaybg:
