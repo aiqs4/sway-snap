@@ -2,7 +2,7 @@ name: sway
 # title:
 type: app
 base: core18
-version: '1.0'
+version: '1.2.0-2'
 summary: i3-compatible Wayland compositor
 description: |
   Sway is a tiling window manager and Wayland compositor, inspired by i3, and written in C. It is designed as a drop in replacement for i3 using the more modern Wayland display server protocol and wlroots compositor library.
@@ -23,6 +23,7 @@ confinement: devmode
 apps:
   sway:
     command: usr/bin/sway
+    desktop: usr/share/wayland-sessions/sway.desktop
   swaybar:
     command: usr/bin/swaybar
     aliases: [ swaybar ]
@@ -33,7 +34,6 @@ apps:
     command: usr/bin/swaynag
     aliases: [ swaynag ]
 
-
 build-packages:
   - cmake # meson likes cmake
   - pkgconf
@@ -43,7 +43,7 @@ build-packages:
 parts:
   wayland-protocols:
     source: https://gitlab.freedesktop.org/wayland/wayland-protocols.git
-    source-tag: '1.17'
+    source-tag: '1.18'
     source-depth: 1
     plugin: autotools
     configflags: [ --prefix=/usr ]
@@ -62,11 +62,18 @@ parts:
   wlroots:
     after: [ wayland-protocols ]
     source: https://github.com/swaywm/wlroots.git
-    source-tag: '0.5.0'
+    source-commit: '9796abccedef881e99d293a2658c4da9466acd88'
+    # source-tag: '0.8.1'
     source-depth: 1
     plugin: meson
+    meson-version: 0.52.0
     meson-parameters:
       - --prefix=/usr
+      - -Dfreerdp=disabled
+      - -Dlibcap=enabled
+      - -Dlogind=enabled
+      - -Dlogind-provider=systemd
+      - -Dexamples=false
     build-packages: ## TODO: find out the needed dependencies !
       - libgtk-3-dev
       - gtk-doc-tools
@@ -123,11 +130,22 @@ parts:
   sway:
     after: [ json-c, wlroots ]
     source: https://github.com/swaywm/sway.git
-    source-tag: '1.0'
+    source-tag: '1.2'
     source-depth: 1
     plugin: meson
     meson-parameters:
       - --prefix=/usr
+      #- --buildtype=release
+      -  -Dman-pages=disabled
+      -  -Dgdk-pixbuf=enabled
+      -  -Dtray=disabled ## TODO: needs libsystemd
+      -  -Dxwayland=enabled
+
+      - -Dlibcap=enabled
+      - -Dlogind=enabled
+      - -Dlogind-provider=systemd
+
+      - -Dexamples=false
     build-packages:
       - libsystemd0
       - libsystemd-dev
@@ -169,13 +187,3 @@ parts:
       - libxext6
       - libxkbcommon0
       - libxrender1
-
-    override-build: |
-      set -eux
-      snapcraftctl build
-      setcap "cap_sys_ptrace,cap_sys_tty_config=eip" $SNAPCRAFT_PART_INSTALL/usr/bin/sway
-    install: |
-      set -eux
-      snapcraftctl build
-      setcap "cap_sys_ptrace,cap_sys_tty_config=eip" $SNAP/usr/bin/sway
-
