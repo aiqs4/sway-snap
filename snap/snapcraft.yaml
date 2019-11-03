@@ -1,18 +1,66 @@
 name: sway
 base: core18 # the base snap is the execution environment for this snap
-version: '1.0' # just for humans, typically '1.2+git' or '1.3.2'
-summary: SWAY Wayland tiling window manager desktop
+version: '1.2.0' # just for humans, typically '1.2+git' or '1.3.2'
+summary: SWAY Wayland tiling window manager desktop (experimental)
 description: |
-  SWAY is a i3-compatible Wayland compositor 
-  This snap is tested on ubuntu 
+  SWAY is a i3-compatible Wayland compositor
+  This snap is tested on ubuntu
+
+# icon: sway.png
+
+#adopt-info: devmode # use 'strict' once you have the right plugs and slots
+
 grade: devel # must be 'stable' to release into candidate/stable channels
+
 confinement: devmode # use 'strict' once you have the right plugs and slots
+
+architectures:
+  - build-on: amd64
+
+apps:
+  sway:
+    command: sway
+    plugs:
+      - desktop
+      - desktop-legacy
+      - wayland
+      #      - gsettings
+      # - network
+      - x11
+  swaybar:
+    command: swaybar
+    # aliases:
+    #   - swaybar
+    plugs:
+      - desktop
+      - wayland
+  # swaybg:
+  #   command: swaybg
+  #   plugs:
+  #     - desktop
+  #     - wayland
+  #   # aliases:
+  #   #   - swaybg
+  swaymsg:
+    command: swaymsg
+    plugs:
+      - desktop
+      - wayland
+    # aliases:
+    #   - swaymsg
+  swaynag:
+    command: swaynag
+    plugs:
+      - desktop
+      - wayland
+    # aliases:
+    #   - swaynag
 
 parts:
   wayland-protocols: # TODO: check weston version of disco release
     after: [ json-c ]
     source: https://github.com/wayland-project/wayland-protocols.git
-    source-tag: '1.17'
+    source-tag: '1.18'
     plugin: autotools
     configflags: [ --prefix=/usr ]
     build-packages:
@@ -76,7 +124,7 @@ parts:
   wlroots:
     after: [ json-c,wayland-protocols ]
     source: https://github.com/swaywm/wlroots.git
-    source-tag: '0.5.0'
+    source-tag: '0.8.1'
     plugin: meson
     meson-parameters: [ --prefix=/usr ]
     build-packages: ## TODO: find out the needed dependencies !
@@ -97,6 +145,7 @@ parts:
       - build-essential
       # - libweston-5-dev
       - libfontconfig1-dev
+      - freerdp2-dev
       - libfreetype6-dev
       - libxrender-dev
       - libx11-dev
@@ -106,17 +155,27 @@ parts:
       - xutils-dev
       - libxt-dev
       - libpixman-1-dev
+      - libwinpr2-dev
       - libxcb1-dev
+      - libxcb-icccm4-dev
+      - libxcb-xinput-dev
       - libxcb-render0-dev
       - libxcb-shm0-dev
       - zlib1g-dev
       - liblzo2-dev
+    stage-packages:
+      - libwinpr2-2
+      - libxcb-icccm4
+      - libxcb-xinput0
   sway:
     after: [ json-c,wlroots ] 
     source: https://github.com/swaywm/sway.git
-    source-tag: '1.0'
+    source-tag: '1.2'
     plugin: meson
     meson-parameters: [ --prefix=/usr ]
+    # override-pull: | ## FIXME: TODO: download wlroots submodule
+    #   set -eux
+    #   git pull --submodule --recurive
     build-packages:
       - libsystemd0
       - libsystemd-dev
@@ -125,19 +184,21 @@ parts:
       - libavutil-dev
       - libavcodec-dev
       - libavformat-dev
+      #
+      - libcap2-bin ## TODO:
     stage-packages:
       - libegl1
       - libx11-6
       - weston ## TODO: only some dependencies are needed
       - libgdk-pixbuf2.0-0
-  setcap:
-    plugin: nil
-    after: [sway]
-    build-packages:
-      - libcap2-bin
-    override-build: |
-      snapcraftctl build
-      setcap "cap_sys_ptrace,cap_sys_tty_config=eip" /root/stage/usr/bin/sway
+    # override-build: |
+    #   set -eux
+    #   snapcraftctl build
+    #   setcap "cap_sys_ptrace,cap_sys_tty_config=eip" $SNAPCRAFT_PART_INSTALL/usr/bin/sway
+    # install: |
+    #   set -eux
+    #   snapcraftctl build
+    #   setcap "cap_sys_ptrace,cap_sys_tty_config=eip" $SNAP/usr/bin/sway
 
 
 #   swaybg:
