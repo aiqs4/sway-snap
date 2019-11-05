@@ -136,6 +136,7 @@ parts:
       - gnutls-bin
       - valac
       - intltool
+      - libgbm-dev
       - libpcre2-dev
       - libglib3.0-cil-dev
       - libgnutls28-dev
