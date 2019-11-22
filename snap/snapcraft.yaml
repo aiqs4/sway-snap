@@ -1,6 +1,6 @@
 name: sway
 base: core18
-version: '1.2.2'
+version: '1.2.3'
 summary: SWAY Wayland tiling window manager desktop (experimental)
 description: |
   SWAY is a i3-compatible Wayland compositor
@@ -12,6 +12,20 @@ description: |
 
 grade: devel # must be 'stable' to release into candidate/stable channels
 confinement: devmode # use 'strict' once you have the right plugs and slots
+
+environment:
+  SHELL: bash
+  LC_ALL: C.UTF-8
+  LD_LIBRARY_PATH: ${LD_LIBRARY_PATH}:${SNAP}/usr/lib/:${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/
+  PATH: $SNAP/bin/:$SNAP/usr/bin/:${PATH}
+  # XDG config
+  XDG_CACHE_HOME:  $SNAP_USER_COMMON/.cache
+  XDG_CONFIG_DIRS: ${SNAP}/etc/xdg:$XDG_CONFIG_DIRS
+  XDG_CONFIG_HOME: $SNAP_USER_DATA/.config
+  # Prep EGL
+  __EGL_VENDOR_LIBRARY_DIRS: $SNAP/etc/glvnd/egl_vendor.d:$SNAP/usr/share/glvnd/egl_vendor.d
+  LIBGL_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri
+  LIBVA_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri
 
 apps:
   sway:
@@ -53,6 +67,8 @@ apps:
 #    # aliases:
 #    #   - swaynag
 
+
+
 parts:
   wayland-protocols: # TODO: check weston version of disco release
     after: [ json-c ]
@@ -65,9 +81,6 @@ parts:
       - cmake
       - gcc
       - g++
-      # - meson
-      #- ninja-build
-      #- libgtk-3-dev
       - gtk-doc-tools
       - gnutls-bin 
       - valac
@@ -79,7 +92,6 @@ parts:
       - libxml2-utils
       - gperf
       - build-essential
-      #
       - gir1.2-colord-1.0
       - libcolord-dev 
       - libjpeg-dev
@@ -175,6 +187,8 @@ parts:
       - libmtdev1
       - libpixman-1-0
       - libwacom2
+      - libwayland-client0
+      - libwayland-server0
       - libwayland-egl1
       - libxcb-composite0
       - libxcb-render0
@@ -260,3 +274,4 @@ parts:
 #     source-tag: '1.0'
 #     plugin: meson
 #     meson-parameters: [ --prefix=/usr ]
+
