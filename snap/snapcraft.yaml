@@ -2,7 +2,7 @@ name: sway
 # title:
 type: app
 base: core18
-version: '1.2.0-2'
+version: '1.2.0-3'
 summary: i3-compatible Wayland compositor
 description: |
   Sway is a tiling window manager and Wayland compositor, inspired by i3, and written in C. It is designed as a drop in replacement for i3 using the more modern Wayland display server protocol and wlroots compositor library.
@@ -18,6 +18,55 @@ confinement: devmode
 # architectures:
 #   - build-on: [amd64, i386]
 #     run-on: [amd64, i386]
+
+
+environment:
+  SHELL: bash
+  #
+  LC_ALL: C.UTF-8
+  LD_LIBRARY_PATH: ${SNAP}/usr/lib:${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}:${SNAP}/lib:${SNAP}/lib/${SNAPCRAFT_ARCH_TRIPLET}
+  PATH: $SNAP/bin:$SNAP/usr/bin:${PATH}
+
+  # --- Snap compatibality ---
+  SNAPCRAFT_ARCH_TRIPLET: ${SNAPCRAFT_ARCH_TRIPLET} # FIXME: how to get this, on runtime ? e. g. gcc -dumpmachine
+
+  # -- Xkb-Library ---
+  XKB_CONFIG_ROOT: ${SNAP}/usr/share/X11/xkb
+  # XKB_LOG_LEVEL: 50
+  # XKB_LOG_VERBOSITY: 10
+
+  # --- XDG config ---
+  XDG_CACHE_HOME:  ${SNAP_USER_COMMON}/.cache
+  XDG_CONFIG_DIRS: ${SNAP}/etc/xdg # :$XDG_CONFIG_DIRS
+  XDG_CONFIG_HOME: ${SNAP_USER_DATA}/.config
+
+  # --- Prep EGL ---
+  __EGL_VENDOR_LIBRARY_DIRS: $SNAP/etc/glvnd/egl_vendor.d:$SNAP/usr/share/glvnd/egl_vendor.d
+  LIBGL_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri
+  LIBVA_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri
+
+  # --- Prep GDK, GTK, Clutter ---
+  GDK_PIXBUF_BINARY_VERSION: '2.10.0' # FIXME: how to get this from installed version ?
+  GDK_BACKEND: wayland
+  CLUTTER_BACKEND: wayland
+  # FIXME: loaders.cache should be created after install/refresh
+  GDK_PIXBUF_MODULEDIR: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/gdk-pixbuf-2.0/${GDK_PIXBUF_BINARY_VERSION}/loaders/
+  # FIXME: generate loaders.cache file ?!
+  # with: gdk-pixbuf-query-loaders > $libdir/gdk-pixbuf-2.0/$binary_version/loaders.cache
+  # GDK_PIXBUF_MODULE_FILE: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/gdk-pixbuf-2.0/${GDK_PIXBUF_BINARY_VERSION}/loaders.cache
+  GDK_PIXBUF_MODULE_FILE: ${SNAP_USER_COMMON}/gdk-pixbuf-2.0/${GDK_PIXBUF_BINARY_VERSION}/loaders.cache
+
+  GTK_PATH: ${SNAP}/usr/lib/$ARCH/gtk-3.0:${GTK_PATH}
+
+  # --- Qt ---
+  QT_DEBUG_PLUGINS: 1
+  # QTVER: qt5
+  QT_QPA_PLATFORM: wayland-egl
+  QT_QPA_PLATFORM_PLUGIN_PATH: ${SNAP}/usr/lib/x86_64-linux-gnu/qt5/plugins
+  #QT_PLUGIN_PATH: $QTDIR/lib/plugins/
+  QT_PLUGIN_PATH: ${SNAP}/usr/lib/x86_64-linux-gnu/qt5/plugins # FIXME: is this needed ?
+
+  QML2_IMPORT_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/qt5/qml
 
 
 apps:
