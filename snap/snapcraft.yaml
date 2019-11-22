@@ -1,6 +1,6 @@
 name: sway
 base: core18
-version: '1.2.5'
+version: '1.2.6'
 summary: SWAY Wayland tiling window manager desktop (experimental)
 description: |
   SWAY is a i3-compatible Wayland compositor
@@ -38,15 +38,19 @@ apps:
     command: usr/bin/sway
     # adapter: full
     desktop: usr/share/wayland-sessions/sway.desktop
-    plugs:
-      - desktop
-      - desktop-legacy
-    #   #- wayland
-      - opengl
-    #   # - gsettings
-    #   # - network
-      - x11
-      - home
+    # plugs:
+    #   - desktop
+    #   - desktop-legacy
+    #   - wayland
+    #   - opengl
+    # #   # - gsettings
+    #   - network
+    #   - x11
+    #  - hardware-observe
+    #  - locale-control
+    #  - network-observe
+    #  - system-observe
+    #  - home
   swaybar:
     command: usr/bin/swaybar
     #    plugs:
@@ -212,8 +216,10 @@ parts:
       - libxcb-xinput0
   sway:
     after: [ json-c,wlroots ] 
-    source: https://github.com/swaywm/sway.git
-    source-tag: '1.2'
+    # source: https://github.com/swaywm/sway.git
+    # source-tag: '1.2'
+    source: https://salsa.debian.org/swaywm-team/sway.git
+    source-tag: 'debian/1.2-1'
     plugin: meson
     meson-version: 0.51.2
     meson-parameters: [ --prefix=/usr ]
@@ -334,3 +340,5 @@ parts:
     plugin: nil
     stage-packages:
       - libwayland-client0
+      - libwayland-cursor0
+      - libwayland-server0
