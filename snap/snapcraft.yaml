@@ -2,7 +2,7 @@ name: sway
 # title:
 type: app
 base: core18
-version: '1.2.0-3'
+version: '1.2.0-5'
 summary: i3-compatible Wayland compositor
 description: |
   Sway is a tiling window manager and Wayland compositor, inspired by i3, and written in C. It is designed as a drop in replacement for i3 using the more modern Wayland display server protocol and wlroots compositor library.
@@ -76,6 +76,15 @@ apps:
   swaybar:
     command: usr/bin/swaybar
     aliases: [ swaybar ]
+  swaybg:
+    command: usr/bin/swaybg
+    aliases: [ swaybg ]
+  swayidle:
+    command: usr/bin/swayidle
+    aliases: [ swayidle ]
+  swaylock:
+    command: usr/bin/swaylock
+    aliases: [ swaylock ]
   swaymsg:
     command: usr/bin/swaymsg
     aliases: [ swaymsg ]
@@ -236,3 +245,40 @@ parts:
       - libxext6
       - libxkbcommon0
       - libxrender1
+
+
+  swayidle:
+    after: [ sway ]
+    source: https://github.com/swaywm/swayidle.git
+    source-tag: '1.5'
+    source-depth: 1
+    plugin: meson
+    meson-parameters:
+      - --prefix=/usr
+      - -Dman-pages=disabled
+      - -Dlogind=enabled
+
+
+  swaybg:
+    after: [ sway ]
+    source: https://github.com/swaywm/swaybg.git
+    source-tag: '1.0'
+    source-depth: 1
+    plugin: meson
+    meson-parameters:
+      - --prefix=/usr
+      - -Dman-pages=disabled
+      - -Dgdk-pixbuf=enabled
+
+
+  swaylock:
+    after: [ sway ]
+    source: https://github.com/swaywm/swaylock.git
+    source-tag: '1.4'
+    source-depth: 1
+    plugin: meson
+    meson-parameters:
+      - --prefix=/usr
+      - -Dman-pages=disabled
+      - -Dgdk-pixbuf=enabled
+      - -Dpam=enabled
