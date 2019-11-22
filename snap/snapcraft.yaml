@@ -1,6 +1,6 @@
 name: sway
 base: core18
-version: '1.2.1'
+version: '1.2.2'
 summary: SWAY Wayland tiling window manager desktop (experimental)
 description: |
   SWAY is a i3-compatible Wayland compositor
@@ -203,14 +203,14 @@ parts:
       #
       - libcap2-bin ## TODO:
     stage-packages:
-      - libegl1
-      - libx11-6
-      - libgdk-pixbuf2.0-0
       - libcairo2
       - libdatrie1
+      - libegl1
       - libevdev2
       - libfontconfig1
       - libfreetype6
+      - libgdk-pixbuf2.0-0
+      - libgl1-mesa-dri
       - libgles2
       - libgraphite2-3
       - libgudev-1.0-0
@@ -220,14 +220,18 @@ parts:
       - libpango-1.0-0
       - libpangocairo-1.0-0
       - libpangoft2-1.0-0
+      - libpcre3
       - libpixman-1-0
+      - libsystemd0
       - libthai0
       - libwacom2
       - libwayland-cursor0
       - libwayland-egl1
+      - libx11-6
       - libxcb-composite0
       - libxcb-render0
       - libxcb-shm0
+      - libxcb1
       - libxext6
       - libxkbcommon0
       - libxrender1
