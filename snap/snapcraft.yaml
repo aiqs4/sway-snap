@@ -1,6 +1,6 @@
 name: sway
 base: core18
-version: '1.2.3'
+version: '1.2.5'
 summary: SWAY Wayland tiling window manager desktop (experimental)
 description: |
   SWAY is a i3-compatible Wayland compositor
@@ -8,16 +8,21 @@ description: |
 
 # icon: sway.png
 
+# architectures:
+#   - build-on: [amd64, i386]
+#     run-on: [amd64, i386]
+
 #adopt-info: devmode # use 'strict' once you have the right plugs and slots
 
 grade: devel # must be 'stable' to release into candidate/stable channels
 confinement: devmode # use 'strict' once you have the right plugs and slots
 
+
 environment:
   SHELL: bash
   LC_ALL: C.UTF-8
-  LD_LIBRARY_PATH: ${LD_LIBRARY_PATH}:${SNAP}/usr/lib/:${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/
-  PATH: $SNAP/bin/:$SNAP/usr/bin/:${PATH}
+  LD_LIBRARY_PATH: ${LD_LIBRARY_PATH}:${SNAP}/usr/lib:${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}
+  PATH: $SNAP/bin:$SNAP/usr/bin:${PATH}
   # XDG config
   XDG_CACHE_HOME:  $SNAP_USER_COMMON/.cache
   XDG_CONFIG_DIRS: ${SNAP}/etc/xdg:$XDG_CONFIG_DIRS
@@ -27,46 +32,55 @@ environment:
   LIBGL_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri
   LIBVA_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri
 
+
 apps:
   sway:
-    command: sway
+    command: usr/bin/sway
+    # adapter: full
+    desktop: usr/share/wayland-sessions/sway.desktop
     plugs:
       - desktop
       - desktop-legacy
-      - wayland
+    #   #- wayland
       - opengl
-      # - gsettings
-      # - network
+    #   # - gsettings
+    #   # - network
       - x11
+      - home
   swaybar:
-    command: swaybar
-    # aliases:
-    #   - swaybar
-#    plugs:
-#      - desktop
-#      - wayland
-  # swaybg:
-  #   command: swaybg
-  #   plugs:
-  #     - desktop
-  #     - wayland
-  #   # aliases:
-  #   #   - swaybg
+    command: usr/bin/swaybar
+    #    plugs:
+    #      - desktop
+    #      - wayland
+  swaybg:
+    command: usr/bin/swaybg
+    #   plugs:
+    #     - desktop
+    #     - wayland
+  swayidle:
+    command: usr/bin/swayidle
+  swaylock:
+    command: usr/bin/swaylock
   swaymsg:
-    command: swaymsg
-    plugs:
-      - desktop
-      - wayland
-    # aliases:
-    #   - swaymsg
+    command: usr/bin/swaymsg
+    # plugs:
+    #   - desktop
+    #   - wayland
   swaynag:
-    command: swaynag
-#    plugs:
-#      - desktop
-#      - wayland
-#    # aliases:
-#    #   - swaynag
+    command: usr/bin/swaynag
 
+# slots:
+#   wayland:
+
+# plugs: ## FIXME: remove unneeded
+#   wayland:
+#   opengl:
+#   x11:
+#   hardware-observe:
+#   locale-control:
+#   network-observe:
+#   system-observe:
+#   home:
 
 
 parts:
@@ -214,10 +228,9 @@ parts:
       - libavutil-dev
       - libavcodec-dev
       - libavformat-dev
-      #
       - libcap2-bin ## TODO:
     stage-packages:
-      - libcairo2
+      # - libcairo2
       - libdatrie1
       - libegl1
       - libevdev2
@@ -252,26 +265,72 @@ parts:
 
     # override-build: |
     #   set -eux
-    #   snapcraftctl build
+    #  snapcraftctl build
+    #   ln -s $SNAPCRAFT_PART_INSTALL/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libcairo.so.2 $SNAP/usr/lib/libcairo.so.2
     #   setcap "cap_sys_ptrace,cap_sys_tty_config=eip" $SNAPCRAFT_PART_INSTALL/usr/bin/sway
     # install: |
     #   set -eux
-    #   snapcraftctl build
+    #   snapcraftctl install
+    #   cp -nf $SNAPCRAFT_PART_INSTALL/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libcairo.so* $SNAPCRAFT_PART_INSTALL/usr/lib/
     #   setcap "cap_sys_ptrace,cap_sys_tty_config=eip" $SNAP/usr/bin/sway
 
 
-#   swaybg:
-#     after: [ wlroots,sway ]
-#     source: https://github.com/swaywm/swaybg.git
-#     #source-tag: '1.0'
-#     plugin: meson
-#     meson-parameters: [ --prefix=/usr ]
-#     build-packages:
-#       - libsystemd-dev
-#   swaylock:
-#     after: [ wlroots,sway ]
-#     source: https://github.com/swaywm/swaylock.git
-#     source-tag: '1.0'
-#     plugin: meson
-#     meson-parameters: [ --prefix=/usr ]
+  swayidle:
+    after: [ wlroots, sway ]
+    source: https://github.com/swaywm/swayidle.git
+    source-tag: '1.5'
+    plugin: meson
+    meson-parameters: [ --prefix=/usr ]
+    build-packages:
+      - libwayland-dev
+      - libsystemd-dev
+      - pkgconf
+      # - meson
+      # - scdoc
 
+
+  swaybg:
+    after: [ wlroots,sway ]
+    source: https://github.com/swaywm/swaybg.git
+    source-tag: '1.0'
+    plugin: meson
+    meson-parameters: [ --prefix=/usr ]
+    build-packages:
+      # - meson
+      - libsystemd-dev
+      - libwayland-dev
+      - libcairo2-dev
+      - libgdk-pixbuf2.0-dev
+      - pkgconf
+      # - scdoc
+
+
+  swaylock:
+    after: [ wlroots,sway ]
+    source: https://github.com/swaywm/swaylock.git
+    source-tag: '1.4'
+    plugin: meson
+    meson-parameters: [ --prefix=/usr ]
+    build-packages:
+      - libwayland-dev
+      - libcairo2-dev
+      - libgdk-pixbuf2.0-dev
+      - libpam0g-dev
+      - libxkbcommon-dev
+      # - meson
+      - pkgconf
+      # - scdoc
+
+
+  mesa:
+    plugin: nil
+    stage-packages:
+      - libgl1-mesa-dri
+      - libwayland-egl1-mesa
+      - libglu1-mesa
+
+
+  wayland:
+    plugin: nil
+    stage-packages:
+      - libwayland-client0
