@@ -1,10 +1,9 @@
 name: sway
 base: core18
 version: '1.2.6'
-summary: SWAY Wayland tiling window manager desktop (experimental)
+summary: i3-compatible Wayland compositor
 description: |
-  SWAY is a i3-compatible Wayland compositor
-  This snap is tested on ubuntu
+  Sway is a tiling window manager and Wayland compositor, inspired by i3, and written in C. It is designed as a drop in replacement for i3 using the more modern Wayland display server protocol and wlroots compositor library.
 
 # icon: sway.png
 
@@ -14,7 +13,7 @@ description: |
 
 #adopt-info: devmode # use 'strict' once you have the right plugs and slots
 
-grade: devel # must be 'stable' to release into candidate/stable channels
+grade: stable
 confinement: devmode # use 'strict' once you have the right plugs and slots
 
 
@@ -88,198 +87,88 @@ apps:
 
 
 parts:
-  wayland-protocols: # TODO: check weston version of disco release
-    after: [ json-c ]
-    source: https://github.com/wayland-project/wayland-protocols.git
+  wayland-protocols:
+    source: https://gitlab.freedesktop.org/wayland/wayland-protocols.git
     source-tag: '1.18'
     plugin: autotools
     configflags: [ --prefix=/usr ]
     build-packages:
-      - pkgconf
-      - cmake
-      - gcc
-      - g++
-      - gtk-doc-tools
-      - gnutls-bin 
-      - valac
-      - intltool
-      - libpcre2-dev
-      - libglib3.0-cil-dev 
-      - libgnutls28-dev 
-      - libgirepository1.0-dev
-      - libxml2-utils
-      - gperf
-      - build-essential
-      - gir1.2-colord-1.0
-      - libcolord-dev 
-      - libjpeg-dev
-      - libjpeg-turbo8-dev
-      - libjpeg8-dev
-      - liblcms2-dev
-      - libvpx-dev
-      - quilt
-      #
-      - libwayland-dev
-      - libinput-dev
-      - libcap-dev
-      # - wayland-protocols ## TODO: on 19.04 there is the correct version
-      - libegl1-mesa-dev
-      - libgles2-mesa-dev
-      - libdrm-dev
-      - libgbm-dev
-      - libxkbcommon-dev
-      - libudev-dev
-      - libpixman-1-dev
-      - libxcb-composite0-dev
-      - libxcb-xfixes0-dev
-      - libxcb-image0-dev
-      - libxcb-render0-dev
-      - libx11-xcb-dev
+      - libwayland-bin
+
   json-c:
     source: https://github.com/json-c/json-c.git
     # source-tag: json-c-0.13.1-20180305
     plugin: autotools
     configflags: [ --prefix=/usr ]
-    build-packages:
-      - cmake
-      - clang
-      - build-essential
-      - doxygen
-      - autoconf
-      - automake-1.15
-      - libtool
+
   wlroots:
-    after: [ json-c,wayland-protocols ]
+    after: [wayland-protocols]
     source: https://github.com/swaywm/wlroots.git
-    #source-tag: '0.8.1'
-    source-commit: '9796abccedef881e99d293a2658c4da9466acd88'
+    source-tag: '0.8.1'
     plugin: meson
-    meson-version: 0.52.0
-    meson-parameters: [ '--prefix=/usr', '-Dfreerdp=disabled' ]
-    build-packages: ## TODO: find out the needed dependencies !
-      - pkgconf
-      - cmake
-      - g++
-      - libgtk-3-dev
-      - gtk-doc-tools
-      - gnutls-bin
-      - valac
-      - intltool
-      - libavutil-dev
-      - libavcodec-dev
-      - libavformat-dev
+    meson-version: 0.51.2
+    meson-parameters:
+      - --prefix=/usr
+      - -Dfreerdp=disabled
+      - -Dlibcap=enabled
+      - -Dlogind=enabled
+      - -Dlogind-provider=systemd
+      - -Dexamples=false
+    build-packages:
+      - libwayland-dev
+      - libegl1-mesa-dev
+      - libgles2-mesa-dev
       - libgbm-dev
-      - libpcre2-dev
-      - libglib3.0-cil-dev
-      - libgnutls28-dev
-      - libgirepository1.0-dev
-      - libxml2-utils
-      - gperf
-      # - libweston-5-dev
-      - libfontconfig1-dev
-      - freerdp2-dev
-      - libfreetype6-dev
-      # - libinput-dev
-      # - libpixman-1-dev
-      - libxrender-dev
-      - libx11-dev
-      - libxext-dev
-      - libpng-dev
-      - libsm-dev
-      - xutils-dev
-      - libxt-dev
+      - libinput-dev
+      - libxkbcommon-dev
       - libpixman-1-dev
-      - libwinpr2-dev
-      - libxcb1-dev
-      - libxcb-icccm4-dev
-      - libxcb-xinput-dev
-      - libxcb-render0-dev
-      - libxcb-shm0-dev
-      - zlib1g-dev
-      - liblzo2-dev
+      - libpng-dev
+      - libsystemd-dev
+      - libcap-dev
     stage-packages:
+      - libdrm2
+      - libegl1
       - libevdev2
+      - libgbm1
       - libgles2
+      - libglvnd0
       - libgudev-1.0-0
       - libinput10
       - libmtdev1
       - libpixman-1-0
       - libwacom2
       - libwayland-client0
-      - libwayland-server0
       - libwayland-egl1
-      - libxcb-composite0
-      - libxcb-render0
+      - libwayland-server0
       - libxkbcommon0
-      - libwinpr2-2
-      - libxcb-icccm4
-      - libxcb-xinput0
+    stage: [usr]
+
   sway:
-    after: [ json-c,wlroots ] 
-    # source: https://github.com/swaywm/sway.git
-    # source-tag: '1.2'
-    source: https://salsa.debian.org/swaywm-team/sway.git
-    source-tag: 'debian/1.2-1'
+    after: [wlroots, json-c]
+    source: https://github.com/swaywm/sway.git
+    source-tag: '1.2'
     plugin: meson
-    meson-version: 0.51.2
-    meson-parameters: [ --prefix=/usr ]
-    # override-pull: | ## FIXME: TODO: download wlroots submodule
-    #   set -eux
-    #   git pull --submodule --recurive
+    meson-parameters:
+      - --prefix=/usr
     build-packages:
-      - libsystemd0
-      - libsystemd-dev
-      # - scdoc
-      - ctags
-      - libavutil-dev
-      - libavcodec-dev
-      - libavformat-dev
-      - libcap2-bin ## TODO:
+      - libcairo2-dev
+      - libpango1.0-dev
+      - libgdk-pixbuf2.0-dev
     stage-packages:
-      # - libcairo2
+      - libcairo2
       - libdatrie1
-      - libegl1
-      - libevdev2
       - libfontconfig1
       - libfreetype6
-      - libgdk-pixbuf2.0-0
-      - libgl1-mesa-dri
-      - libgles2
       - libgraphite2-3
-      - libgudev-1.0-0
       - libharfbuzz0b
-      - libinput10
-      - libmtdev1
       - libpango-1.0-0
       - libpangocairo-1.0-0
       - libpangoft2-1.0-0
-      - libpcre3
-      - libpixman-1-0
-      - libsystemd0
+      - libpng16-16
       - libthai0
-      - libwacom2
-      - libwayland-cursor0
-      - libwayland-egl1
-      - libx11-6
-      - libxcb-composite0
       - libxcb-render0
       - libxcb-shm0
-      - libxcb1
-      - libxext6
-      - libxkbcommon0
       - libxrender1
-
-    # override-build: |
-    #   set -eux
-    #  snapcraftctl build
-    #   ln -s $SNAPCRAFT_PART_INSTALL/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libcairo.so.2 $SNAP/usr/lib/libcairo.so.2
-    #   setcap "cap_sys_ptrace,cap_sys_tty_config=eip" $SNAPCRAFT_PART_INSTALL/usr/bin/sway
-    # install: |
-    #   set -eux
-    #   snapcraftctl install
-    #   cp -nf $SNAPCRAFT_PART_INSTALL/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libcairo.so* $SNAPCRAFT_PART_INSTALL/usr/lib/
-    #   setcap "cap_sys_ptrace,cap_sys_tty_config=eip" $SNAP/usr/bin/sway
-
 
   swayidle:
     after: [ wlroots, sway ]
@@ -290,7 +179,6 @@ parts:
     build-packages:
       - libwayland-dev
       - libsystemd-dev
-      - pkgconf
       # - meson
       # - scdoc
 
@@ -307,8 +195,17 @@ parts:
       - libwayland-dev
       - libcairo2-dev
       - libgdk-pixbuf2.0-dev
-      - pkgconf
       # - scdoc
+    stage-packages:
+      - libcairo2
+      - libfontconfig1
+      - libfreetype6
+      - libgdk-pixbuf2.0-0
+      - libpng16-16
+      - libxcb-render0
+      - libxcb-shm0
+      - libxrender1
+
 
 
   swaylock:
@@ -324,21 +221,28 @@ parts:
       - libpam0g-dev
       - libxkbcommon-dev
       # - meson
-      - pkgconf
       # - scdoc
-
-
-  mesa:
-    plugin: nil
     stage-packages:
-      - libgl1-mesa-dri
-      - libwayland-egl1-mesa
-      - libglu1-mesa
+      - libcairo2
+      - libfontconfig1
+      - libfreetype6
+      - libgdk-pixbuf2.0-0
+      - libpng16-16
+      - libxcb-render0
+      - libxcb-shm0
+      - libxrender1
+
+  # mesa:
+  #   plugin: nil
+  #   stage-packages:
+  #     - libgl1-mesa-dri
+  #     - libwayland-egl1-mesa
+  #     - libglu1-mesa
 
 
-  wayland:
-    plugin: nil
-    stage-packages:
-      - libwayland-client0
-      - libwayland-cursor0
-      - libwayland-server0
+  # wayland:
+  #   plugin: nil
+  #   stage-packages:
+  #     - libwayland-client0
+  #     - libwayland-cursor0
+  #     - libwayland-server0
