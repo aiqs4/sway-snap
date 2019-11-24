@@ -2,7 +2,7 @@ name: sway
 # title:
 type: app
 base: core18
-version: '1.2.0-6'
+version: '1.2.0-7'
 summary: i3-compatible Wayland compositor
 description: |
   Sway is a tiling window manager and Wayland compositor, inspired by i3, and written in C. It is designed as a drop in replacement for i3 using the more modern Wayland display server protocol and wlroots compositor library.
@@ -238,3 +238,69 @@ parts:
       - -Dman-pages=disabled
       - -Dgdk-pixbuf=enabled
       - -Dpam=enabled
+
+
+  # mesa:
+  #   plugin: nil
+  #   stage-packages:
+  #     - libegl-mesa0
+  #     - libegl1-mesa
+  #     - libgl1-mesa-dri
+  #     - libwayland-egl1-mesa
+  #     - libglu1-mesa
+  #     - mesa-va-drivers
+  #     - mesa-vdpau-drivers
+  #     - mesa-vulkan-drivers
+  #     - libglx-mesa0
+  #     - libglw1-mesa
+
+
+  egl: # TODO: check who needs what ...
+    plugin: nil
+    stage-packages:
+      - libdrm2
+
+      - libglvnd0
+      - libegl1
+      - libvdpau-va-gl1
+      # 
+      - libgl1
+      - libgl2ps1.4
+      - libglx0
+      - libgle3
+      - libgles1
+      - libgles2
+      # - libglew2.1
+
+      - libglbinding2
+
+      - libvdpau1
+      - libva-drm2
+      - vdpau-driver-all
+      - va-driver-all
+      - libxcb-dri2-0
+      - libxcb-dri3-0
+
+      #
+      - libglfw3-wayland
+      - libwayland-egl1
+      # - libwayland-egl++0 ## TODO: not found on core18
+      - on amd64,i386:
+        - libdrm-intel1
+      - try:
+        - libdrm-amdgpu1
+      - try:
+        - libdrm-nouveau2
+      - try:
+        - libdrm-radeon1
+      - try:
+        - libnvidia-egl-wayland1
+
+
+  wayland:
+    plugin: nil
+    stage-packages:
+      - libwayland-egl1 # | libwayland-egl1-mesa
+      - libwayland-client0
+      - libwayland-cursor0
+      - libwayland-server0
