@@ -2,7 +2,7 @@ name: sway
 # title:
 type: app
 base: core18
-version: '1.2.0-8'
+version: '1.2.0-24'
 summary: i3-compatible Wayland compositor
 description: |
   Sway is a tiling window manager and Wayland compositor, inspired by i3, and written in C. It is designed as a drop in replacement for i3 using the more modern Wayland display server protocol and wlroots compositor library.
@@ -120,6 +120,7 @@ plugs:
 
 build-packages:
   - cmake # meson likes cmake
+  - ctags # meson
   - pkgconf
   - quilt
 
@@ -131,6 +132,7 @@ parts:
     organize:
       sway: bin/sway
 
+
   wayland-protocols:
     source: https://gitlab.freedesktop.org/wayland/wayland-protocols.git
     source-tag: '1.18'
@@ -140,6 +142,7 @@ parts:
     build-packages:
       - libwayland-bin
 
+
   json-c:
     source: https://github.com/json-c/json-c.git
     # source-tag: json-c-0.13.1-20180305
@@ -147,32 +150,62 @@ parts:
     plugin: autotools
     configflags: [ --prefix=/usr ]
 
-  wlroots:
-    after: [ wayland-protocols ]
-    source: https://github.com/swaywm/wlroots.git
-    source-commit: '9796abccedef881e99d293a2658c4da9466acd88'
-    # source-tag: '0.8.1'
-    source-depth: 1
+
+  sway:
+    after: [ json-c, wayland-protocols ]
+    source: https://github.com/swaywm/sway.git
+    source-tag: 'v1.2'
     plugin: meson
     meson-version: 0.52.0
+    source-depth: 1
     meson-parameters:
       - --prefix=/usr
-      - -Dfreerdp=disabled
+      #- --buildtype=release
+      -  -Dman-pages=disabled
+      -  -Dgdk-pixbuf=enabled
+      -  -Dtray=disabled ## TODO: needs libsystemd
+      -  -Dxwayland=enabled
+
+      - -Dfreerdp=disabled ## TODO: from wlroots
+      - -Dwlroots:freerdp=disabled ## TODO: from wlroots
+
       - -Dlibcap=enabled
       - -Dlogind=enabled
       - -Dlogind-provider=systemd
+
       - -Dexamples=false
+    override-pull: |
+      set -eux
+      snapcraftctl pull
+      mkdir subprojects
+      git clone -b 0.8.1 https://github.com/swaywm/wlroots.git subprojects/wlroots
+      cd subprojects/wlroots
+      git checkout 9796abccedef881e99d293a2658c4da9466acd88
     build-packages:
-      - libwayland-dev
-      - libegl1-mesa-dev
-      - libgles2-mesa-dev
+      - libcairo2-dev
+      - libdrm-dev
+      - libpango1.0-dev
+      - libgdk-pixbuf2.0-dev
+      - libsystemd-dev
+      - libcap-dev
       - libgbm-dev
       - libinput-dev
       - libxkbcommon-dev
       - libpixman-1-dev
       - libpng-dev
-      - libsystemd-dev
-      - libcap-dev
+      - libxcb1-dev
+      - libxcb-composite0-dev
+      - libxcb-icccm4-dev
+      - libxcb-image0-dev
+      - libxcb-render0-dev
+      - libxcb-xfixes0-dev
+      - libxcb-xinput-dev
+      - libpcre3-dev
+      - libpam0g-dev
+      - libegl1-mesa-dev
+      - libgles2-mesa-dev
+      - libwayland-egl-backend-dev
+      - libwayland-dev
     stage-packages:
       - libdrm2
       - libegl1
@@ -186,40 +219,11 @@ parts:
       - libpixman-1-0
       - libwacom2
       - libxcb-composite0
-      - libxcb-render0
       - libxkbcommon0
       - libwinpr2-2
       - libxcb-icccm4
       - libxcb-xinput0
 
-
-  sway:
-    after: [ json-c, wlroots ]
-    source: https://github.com/swaywm/sway.git
-    source-tag: '1.2'
-    source-depth: 1
-    plugin: meson
-    meson-parameters:
-      - --prefix=/usr
-      #- --buildtype=release
-      -  -Dman-pages=disabled
-      -  -Dgdk-pixbuf=enabled
-      -  -Dtray=disabled ## TODO: needs libsystemd
-      -  -Dxwayland=enabled
-
-      - -Dlibcap=enabled
-      - -Dlogind=enabled
-      - -Dlogind-provider=systemd
-
-      - -Dexamples=false
-    build-packages:
-      - libcairo2-dev
-      - libpango1.0-dev
-      - libgdk-pixbuf2.0-dev
-      - libsystemd0
-      - libsystemd-dev
-      - libcap2-bin
-    stage-packages:
       - libcairo2
       - libdatrie1
       - libfontconfig1
@@ -231,9 +235,17 @@ parts:
       - libpangoft2-1.0-0
       - libpng16-16
       - libthai0
+      - libx11-xcb1
       - libxcb-render0
       - libxcb-shm0
+      - libxcb-xfixes0
+      - libxcb-xkb1 ## TODO: is needed ?
+      - libxext6
+      - libxkbfile1 ## TODO: is needed ?
       - libxrender1
+      - libgdk-pixbuf2.0-0
+      - libgdk-pixbuf2.0-bin ## TODO: only for test
+
 
   swayidle:
     after: [ sway ]
