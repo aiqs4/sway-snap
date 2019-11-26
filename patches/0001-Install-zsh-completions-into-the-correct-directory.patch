@@ -1,0 +1,25 @@
+From 32ef38d1639d6677b6d3b1dc8aa1956b2bd65b8e Mon Sep 17 00:00:00 2001
+From: Birger Schacht <birger@rantanplan.org>
+Date: Sun, 3 Mar 2019 18:38:45 +0100
+Subject: [PATCH] Install zsh completions into the correct directory
+
+---
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index d3172bdd..2c4b0944 100644
+--- a/meson.build
++++ b/meson.build
+@@ -209,7 +209,7 @@ if get_option('zsh-completions')
+ 		'completions/zsh/_sway',
+ 		'completions/zsh/_swaymsg',
+ 	)
+-	zsh_install_dir = datadir + '/zsh/site-functions'
++	zsh_install_dir = datadir + '/zsh/vendor-completions'
+ 
+ 	install_data(zsh_files, install_dir: zsh_install_dir)
+ endif
+-- 
+2.20.1
+
