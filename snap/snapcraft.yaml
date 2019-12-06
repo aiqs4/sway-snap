@@ -71,6 +71,8 @@ environment:
 
 apps:
   sway:
+    command: bin/sway
+  sway-real:
     command: usr/bin/sway
     desktop: usr/share/wayland-sessions/sway.desktop
   swaybar:
@@ -99,6 +101,12 @@ build-packages:
 
 
 parts:
+  app-wrappers:
+    plugin: dump
+    source: app-wrappers/
+    organize:
+      sway: bin/sway
+
   wayland-protocols:
     source: https://gitlab.freedesktop.org/wayland/wayland-protocols.git
     source-tag: '1.18'
