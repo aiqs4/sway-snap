@@ -277,6 +277,13 @@ parts:
       - -Dpam=enabled
 
 
+  needed-tools:
+    plugin: nil
+    stage-packages:
+      - i3status
+      - i3-wm    ## TODO: find a replacement for i3-config-wizard, and others
+      - suckless-tools
+
   # mesa:
   #   plugin: nil
   #   stage-packages:
