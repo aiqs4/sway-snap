@@ -284,6 +284,13 @@ parts:
       - i3-wm    ## TODO: find a replacement for i3-config-wizard, and others
       - suckless-tools
 
+
+  x11:
+    plugin: nil
+    stage-packages:
+      - xwayland
+
+
   # mesa:
   #   plugin: nil
   #   stage-packages:
