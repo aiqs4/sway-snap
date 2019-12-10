@@ -2,7 +2,7 @@ name: sway
 # title:
 type: app
 base: core18
-version: '1.2.0-26'
+version: '1.2.0-30'
 summary: i3-compatible Wayland compositor
 description: |
   Sway is a tiling window manager and Wayland compositor, inspired by i3, and written in C. It is designed as a drop in replacement for i3 using the more modern Wayland display server protocol and wlroots compositor library.
@@ -102,6 +102,7 @@ plugs:
   #   bus: session
   #   interface: dbus
   #   name: org.freedesktop.PolicyKit1
+
 
   wayland:
   x11:
@@ -352,8 +353,7 @@ parts:
       - libglfw3-wayland
       - libwayland-egl1
       # - libwayland-egl++0 ## TODO: not found on core18
-      - on amd64,i386:
-        - libdrm-intel1
+      
       - try:
         - libdrm-amdgpu1
       - try:
@@ -362,6 +362,8 @@ parts:
         - libdrm-radeon1
       - try:
         - libnvidia-egl-wayland1
+      - on amd64,i386:
+        - libdrm-intel1
 
 
   wayland:
