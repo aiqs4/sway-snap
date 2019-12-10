@@ -127,6 +127,13 @@ build-packages:
 
 
 parts:
+  externals:
+     plugin: dump
+     source: .
+     organize:
+       sway-config: etc/sway/config
+
+
   wayland-protocols:
     source: https://gitlab.freedesktop.org/wayland/wayland-protocols.git
     source-tag: '1.18'
@@ -239,6 +246,8 @@ parts:
       - libxrender1
       - libgdk-pixbuf2.0-0
       - libgdk-pixbuf2.0-bin ## TODO: only for test
+    stage:
+      - -etc/sway/config
 
 
   swayidle:
