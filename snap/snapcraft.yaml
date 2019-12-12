@@ -35,14 +35,17 @@ environment:
   # XKB_LOG_VERBOSITY: 10
 
   # --- XDG config ---
-  XDG_CACHE_HOME:  ${SNAP_USER_COMMON}/.cache
-  XDG_CONFIG_DIRS: ${SNAP}/etc/xdg # :$XDG_CONFIG_DIRS
-  XDG_CONFIG_HOME: ${SNAP_USER_DATA}/.config
+  XDG_SESSION_TYPE: wayland
+  # XDG_CACHE_HOME:  ${SNAP_USER_COMMON}/.cache
+  # XDG_CONFIG_DIRS: ${SNAP}/etc/xdg:$XDG_CONFIG_DIRS
+  # XDG_CONFIG_HOME: ${SNAP_USER_DATA}/.config
+
 
   # --- Prep EGL ---
   __EGL_VENDOR_LIBRARY_DIRS: $SNAP/etc/glvnd/egl_vendor.d:$SNAP/usr/share/glvnd/egl_vendor.d
   LIBGL_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri
   LIBVA_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri
+  # TODO: FIXME: special case for nvidia: https://github.com/plars/stellarium-snap/pull/2/files
 
   # --- Prep GDK, GTK, Clutter ---
   GDK_PIXBUF_BINARY_VERSION: '2.10.0' # FIXME: how to get this from installed version ?
@@ -60,12 +63,26 @@ environment:
   # --- Qt ---
   QT_DEBUG_PLUGINS: 1
   # QTVER: qt5
-  QT_QPA_PLATFORM: wayland-egl
+  QT_QPA_PLATFORM: wayland-egl  # TODO: does wayland_shm for software-rendering here also exists ?
+  QT_WAYLAND_FORCE_DPI: physical
+  QT_WAYLAND_DISABLE_WINDOWDECORATION: 1
   QT_QPA_PLATFORM_PLUGIN_PATH: ${SNAP}/usr/lib/x86_64-linux-gnu/qt5/plugins
   #QT_PLUGIN_PATH: $QTDIR/lib/plugins/
   QT_PLUGIN_PATH: ${SNAP}/usr/lib/x86_64-linux-gnu/qt5/plugins # FIXME: is this needed ?
-
   QML2_IMPORT_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/qt5/qml
+
+  # --- SDL ---
+  SDL_VIDEODRIVER: wayland
+
+  # --- JAVA ---
+  _JAVA_AWT_WM_NONREPARENTING: 1
+
+  # --- Firefox ---
+  MOZ_ENABLE_WAYLAND: 1
+
+  # --- Elementary/EFL ---
+  ECORE_EVAS_ENGINE: wayland_egl  # TODO: or wayland_shm for software-rendering
+  ELM_ENGINE: wayland_egl
 
 
 apps:
