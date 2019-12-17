@@ -2,10 +2,10 @@
 
 set -ex
 
-
 [ ! -d "${SNAP_USER_DATA}/.config/sway" ] && mkdir -p -m 770 ${SNAP_USER_DATA}/.config/sway
 
 if [ -e ${SNAP}/etc/sway/config ] ; then
   cp -n ${SNAP}/etc/sway/config ${SNAP_USER_DATA}/.config/sway/config
 fi
 
+echo "$(date) post-refresh-hook " >> /tmp/sway-hook.log

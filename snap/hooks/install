@@ -7,3 +7,9 @@ set -ex
 if [ -e ${SNAP}/etc/sway/config ] ; then
   cp -n ${SNAP}/etc/sway/config ${SNAP_USER_DATA}/.config/sway
 fi
+
+
+echo "$(date) install-hook " >> /tmp/sway-hook.log
+
+# TODO: Previously in obsolete launcher/wrapper
+mkdir ${XDG_RUNTIME_DIR}
