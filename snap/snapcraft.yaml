@@ -383,7 +383,7 @@ parts:
   x11:
     plugin: nil
     stage-packages:
-      - xwayland
+      # - xwayland
       - xkb-data
       - x11-xkb-utils
       - xfonts-terminus
@@ -465,3 +465,79 @@ parts:
       - lxterminal
       - qterminal
       - x11-apps
+
+
+## ==========================
+## Testing Xwayland packages
+## ==========================
+  libglvnd: # TODO: maybe this could be used earlier for other packages ...
+    ## TODO: this is libgl1, libglx0 and libglvnd0
+    plugin: autotools
+    source: https://github.com/NVIDIA/libglvnd.git
+    source-tag: v1.2.0
+    configflags:
+      - --prefix=/usr
+    build-packages:
+      - libx11-dev
+      - libxext-dev
+      # - python-dev
+      # - python-libxml2
+      # - x11proto-gl-dev
+      # - xauth
+      # - xvfb
+
+  xwayland:
+    after: [ libglvnd ]
+    plugin: meson
+    source: https://gitlab.freedesktop.org/xorg/xserver.git
+    source-tag: xorg-server-1.20.6
+    build-environment:
+      - CFLAGS: "-DDEBUG"
+      - CPPFLAGS: "-DDEBUG"
+    meson-parameters:
+      - --prefix=/usr
+      - --buildtype=debug
+      # - --udev=true
+      # - -Dxkb_dir=share/X11/xkb
+      # - -Dxkb-output_dir=/tmp/x11/compiled # FIXME: find better place ! orignal is share/X11/xkb/compiled
+      - -Dxorg=false
+      - -Dxephyr=false
+      - -Dxwayland=true
+      - -Dglamor=true
+      - -Dxwayland_eglstream=false # TODO:
+      - -Dxnest=false
+      - -Ddmx=false
+      - -Dxvfb=false
+      - -Dxwin=false
+      #
+      - -Dxdmcp=false
+      # - -Dxdm-auth-1=true
+      # - -Dsecure-rpc=true
+      # - -Dipv6=auto
+      # ...
+      - -Dhal=false # FIXME: is too old ?
+      # ...
+      - -Dscreensaver=false
+      # ...
+      ## TODO: FIXME: more options ?
+    build-packages:
+      #- libxcb-xkb-dev
+      #- libxcb-glx0-dev
+      - libxkbfile-dev
+      # - xkb-data
+      # - x11-xkb-utils
+      - libbsd-dev
+      # - xfonts-utils
+      - libxfont-dev
+      - libdbus-1-dev
+      - libdrm-dev
+      - libepoxy-dev
+      - libgbm-dev
+      # - libtirpc-dev ## TODO: check ?
+      - nettle-dev
+
+      - x11-xkb-utils
+      - xfonts-utils
+    stage-packages:
+      - libfontenc1
+      - libxfont2
