@@ -2,7 +2,7 @@ name: sway
 # title:
 type: app
 base: core18
-version: '1.2.0-50'
+version: '1.2.0-64'
 summary: i3-compatible Wayland compositor
 description: |
   Sway is a tiling window manager and Wayland compositor, inspired by i3, and written in C. It is designed as a drop in replacement for i3 using the more modern Wayland display server protocol and wlroots compositor library.
@@ -22,17 +22,29 @@ confinement: strict
 environment:
   SHELL: bash
   #
-  LC_ALL: C.UTF-8
-  LD_LIBRARY_PATH: ${SNAP}/usr/lib:${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}:${SNAP}/lib:${SNAP}/lib/${SNAPCRAFT_ARCH_TRIPLET}
-  PATH: $SNAP/bin:$SNAP/usr/bin:${PATH}
+  # LANG: null
+  LC_ALL: C
+  # LC_ALL: C.UTF-8
 
   # --- Snap compatibality ---
   SNAPCRAFT_ARCH_TRIPLET: ${SNAPCRAFT_ARCH_TRIPLET} # FIXME: how to get this, on runtime ? e. g. gcc -dumpmachine
 
+  LD_LIBRARY_PATH: ${SNAP}/usr/lib:${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}:${SNAP}/lib:${SNAP}/lib/${SNAPCRAFT_ARCH_TRIPLET}:${LD_LIBRARY_PATH}
+  PATH: $SNAP/bin:$SNAP/usr/bin:${PATH}
+
+
+  LD_PRELOAD: ${SNAP}/lib/bindtextdomain.so:${LD_PRELOAD}
+
   # -- Xkb-Library ---
-  XKB_CONFIG_ROOT: ${SNAP}/usr/share/X11/xkb
-  # XKB_LOG_LEVEL: 50
-  # XKB_LOG_VERBOSITY: 10
+  XKB_CONFIG_ROOT: ${SNAP}/usr/share/X11/xkb # :${XKB_CONFIG_ROOT} # TODO: also in gnome
+  XKB_LOG_LEVEL: 50
+  XKB_LOG_VERBOSITY: 10
+
+  # XKB_DEFAULT_RULES
+  # XKB_DEFAULT_MODEL
+  # XKB_DEFAULT_LAYOUT
+  # XKB_DEFAULT_VARIANT
+  # XKB_DEFAULT_OPTIONS
 
   # --- XDG config ---
   XDG_SESSION_TYPE: wayland
@@ -40,36 +52,58 @@ environment:
   # XDG_CONFIG_DIRS: ${SNAP}/etc/xdg:$XDG_CONFIG_DIRS
   # XDG_CONFIG_HOME: ${SNAP_USER_DATA}/.config
 
+  # --- locale ---
+  LOCPATH: ${SNAP}/usr/lib/locale:${LOCPATH} # TODO: also in gnome
+  XLOCALEDIR: ${SNAP}/usr/share/X11/locale:${XLOCALEDIR} # TODO: also in gnome
+
+  FONTCONFIG_FILE: ${SNAP}/etc/fonts/fonts.conf:${FONTCONFIG_FILE} # TODO: also in gnome
+  FONTCONFIG_PATH: ${SNAP}/etc/fonts:${FONTCONFIG_PATH} # TODO: also in gnome
+
+  # --- X ---
+  XCURSOR_PATH: ${SNAP}/data-dir/icons:${SNAP}/usr/share/icons:${XCURSOR_PATH}  # TODO: also in gnome  # TODO: data-dir ?
+
 
   # --- Prep EGL ---
-  __EGL_VENDOR_LIBRARY_DIRS: $SNAP/etc/glvnd/egl_vendor.d:$SNAP/usr/share/glvnd/egl_vendor.d
-  LIBGL_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri
-  LIBVA_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri
+  __EGL_VENDOR_LIBRARY_DIRS: $SNAP/etc/glvnd/egl_vendor.d:$SNAP/usr/share/glvnd/egl_vendor.d:${__EGL_VENDOR_LIBRARY_DIRS}
+  LIBGL_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri:${LIBGL_DRIVERS_PATH} ## TODO: also in gnome
+  LIBVA_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri:${LIBVA_DRIVERS_PATH}
   # TODO: FIXME: special case for nvidia: https://github.com/plars/stellarium-snap/pull/2/files
 
   # --- Prep GDK, GTK, Clutter ---
-  GDK_PIXBUF_BINARY_VERSION: '2.10.0' # FIXME: how to get this from installed version ?
   GDK_BACKEND: wayland
   CLUTTER_BACKEND: wayland
-  # FIXME: loaders.cache should be created after install/refresh
-  GDK_PIXBUF_MODULEDIR: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/gdk-pixbuf-2.0/${GDK_PIXBUF_BINARY_VERSION}/loaders/
-  # FIXME: generate loaders.cache file ?!
-  # with: gdk-pixbuf-query-loaders > $libdir/gdk-pixbuf-2.0/$binary_version/loaders.cache
-  # GDK_PIXBUF_MODULE_FILE: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/gdk-pixbuf-2.0/${GDK_PIXBUF_BINARY_VERSION}/loaders.cache
-  GDK_PIXBUF_MODULE_FILE: ${SNAP_USER_COMMON}/gdk-pixbuf-2.0/${GDK_PIXBUF_BINARY_VERSION}/loaders.cache
 
-  GTK_PATH: ${SNAP}/usr/lib/$ARCH/gtk-3.0:${GTK_PATH}
+  # GDK_PIXBUF_BINARY_VERSION: '2.10.0' # FIXME: how to get this from installed version ?
+  GDK_PIXBUF_MODULEDIR: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/gdk-pixbuf-2.0/${GDK_PIXBUF_BINARY_VERSION}/loaders:${GDK_PIXBUF_MODULEDIR}  # TODO: also in gnome
+  # # with: gdk-pixbuf-query-loaders > $libdir/gdk-pixbuf-2.0/$binary_version/loaders.cache
+  # GDK_PIXBUF_MODULE_FILE: ${SNAP_USER_COMMON}/gdk-pixbuf-2.0/${GDK_PIXBUF_BINARY_VERSION}/loaders.cache
+
+  GTK_PATH: ${SNAP}/usr/lib/$ARCH/gtk-3.0:${GTK_PATH}:${GTK_PATH} # TODO: also in gnome
+
+  # --- Gobject introspection ---
+  GI_TYPELIB_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/girepository-1.0:${GI_TYPELIB_PATH} # TODO: also in gnome
+
+  # --- GIO ---
+  GIO_MODULE_DIR: ${SNAP_USER_COMMON}/.cache/gio-modules:${GIO_MODULE_DIR}
+
+  # --- Gstreamer ---
+  GST_PLUGIN_PATH: ${SNAP}/lib/x86_64-linux-gnu/gstreamer-1.0:${GST_PLUGIN_PATH}
+  GST_PLUGIN_SCANNER: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/gstreamer1.0/gstreamer-1.0/gst-plugin-scanner:${GST_PLUGIN_SCANNER} # TODO: also in gnome
+  GST_PLUGIN_SYSTEM_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/gstreamer-1.0:${GST_PLUGIN_SYSTEM_PATH} # TODO: also in gnome
+
+  # --- GTK ImLib ---
+  GTK_IM_MODULE_FILE: ${SNAP_USER_COMMON}/.cache/immodules/immodules.cache:${GTK_IM_MODULE_FILE}
 
   # --- Qt ---
-  QT_DEBUG_PLUGINS: 1
+  # QT_DEBUG_PLUGINS: 1
   # QTVER: qt5
   QT_QPA_PLATFORM: wayland-egl  # TODO: does wayland_shm for software-rendering here also exists ?
   QT_WAYLAND_FORCE_DPI: physical
   QT_WAYLAND_DISABLE_WINDOWDECORATION: 1
-  QT_QPA_PLATFORM_PLUGIN_PATH: ${SNAP}/usr/lib/x86_64-linux-gnu/qt5/plugins
+  QT_QPA_PLATFORM_PLUGIN_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/qt5/plugins:${QT_QPA_PLATFORM_PLUGIN_PATH}
   #QT_PLUGIN_PATH: $QTDIR/lib/plugins/
-  QT_PLUGIN_PATH: ${SNAP}/usr/lib/x86_64-linux-gnu/qt5/plugins # FIXME: is this needed ?
-  QML2_IMPORT_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/qt5/qml
+  QT_PLUGIN_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/qt5/plugins:${QT_PLUGIN_PATH} # FIXME: is this needed ?
+  QML2_IMPORT_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/qt5/qml:${QML2_IMPORT_PATH}
 
   # --- SDL ---
   SDL_VIDEODRIVER: wayland
@@ -88,9 +122,9 @@ environment:
 apps:
   sway:
     command: usr/bin/sway
-    extensions:
-      - gnome-3-28
-    desktop: usr/share/wayland-sessions/sway.desktop
+    # extensions:
+    #   - gnome-3-28
+    # desktop: usr/share/wayland-sessions/sway.desktop
   swaybar:
     command: usr/bin/swaybar
     aliases: [ swaybar ]
@@ -141,8 +175,8 @@ plugs:
   system-observe:
   # gnome:
 
-  
-  # For GTK3+ ## TODO: 
+
+  # For GTK3+ ## TODO:
   gtk-3-themes:
     interface: content
     target: $SNAP/data-dir/themes
@@ -350,6 +384,12 @@ parts:
     plugin: nil
     stage-packages:
       - xwayland
+      - xkb-data
+      - x11-xkb-utils
+      - xfonts-terminus
+      - xfonts-utils
+      - xfonts-scalable
+      - xfonts-base
 
 
   # mesa:
