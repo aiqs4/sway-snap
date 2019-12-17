@@ -2,7 +2,7 @@ name: sway
 # title:
 type: app
 base: core18
-version: '1.2.0-64'
+version: '1.2.0-65'
 summary: i3-compatible Wayland compositor
 description: |
   Sway is a tiling window manager and Wayland compositor, inspired by i3, and written in C. It is designed as a drop in replacement for i3 using the more modern Wayland display server protocol and wlroots compositor library.
@@ -189,6 +189,18 @@ plugs:
     interface: content
     target: $SNAP/data-dir/sounds
     default-provider: gtk-common-themes
+
+
+# passthrough:
+#   layout: ## TODO: symlinks didn't work if file exist !
+#     /usr/bin/xkbcomp:
+#       symlink: $SNAP/usr/bin/xkbcomp
+#     /usr/share/fonts:
+#       symlink: $SNAP/usr/share/fonts
+
+# layout:
+#   ${SNAP}/usr/share/fonts:
+#     symlink: /usr/share/xkb
 
 
 build-packages:
