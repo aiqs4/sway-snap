@@ -2,6 +2,8 @@
 
 set -ex
 
+echo "$(date) > Enter: install-hook " >> /tmp/sway-hook.log
+
 [ ! -d "${SNAP_USER_DATA}/.config/sway" ] && mkdir -p -m 770 ${SNAP_USER_DATA}/.config/sway
 
 if [ -e ${SNAP}/etc/sway/config ] ; then
@@ -9,7 +11,7 @@ if [ -e ${SNAP}/etc/sway/config ] ; then
 fi
 
 
-echo "$(date) install-hook " >> /tmp/sway-hook.log
+echo "$(date) < Leave: install-hook " >> /tmp/sway-hook.log
 
 # TODO: Previously in obsolete launcher/wrapper
-mkdir ${XDG_RUNTIME_DIR}
+# mkdir ${XDG_RUNTIME_DIR}

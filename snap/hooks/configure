@@ -2,10 +2,12 @@
 
 set -ex
 
+echo "$(date) > Enter: configure-hook " >> /tmp/sway-hook.log
+
 [ ! -d "${SNAP_USER_DATA}/.config/sway" ] && mkdir -p -m 770 ${SNAP_USER_DATA}/.config/sway
 
 if [ -e ${SNAP}/etc/sway/config ] ; then
   cp -n ${SNAP}/etc/sway/config ${SNAP_USER_DATA}/.config/sway
 fi
 
-echo "$(date) configure-hook " >> /tmp/sway-hook.log
+echo "$(date) < Leave: configure-hook " >> /tmp/sway-hook.log
