@@ -2,7 +2,7 @@ name: sway
 # title:
 type: app
 base: core18
-version: '1.2.0-65'
+version: '1.2.0-68-0dev2'
 summary: i3-compatible Wayland compositor
 description: |
   Sway is a tiling window manager and Wayland compositor, inspired by i3, and written in C. It is designed as a drop in replacement for i3 using the more modern Wayland display server protocol and wlroots compositor library.
@@ -14,10 +14,6 @@ description: |
 
 grade: stable
 confinement: strict
-
-# architectures:
-#   - build-on: [amd64, i386]
-#     run-on: [amd64, i386]
 
 environment:
   SHELL: bash
@@ -32,13 +28,13 @@ environment:
   LD_LIBRARY_PATH: ${SNAP}/usr/lib:${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}:${SNAP}/lib:${SNAP}/lib/${SNAPCRAFT_ARCH_TRIPLET}:${LD_LIBRARY_PATH}
   PATH: $SNAP/bin:$SNAP/usr/bin:${PATH}
 
-
+  # TODO: also in gnome
   LD_PRELOAD: ${SNAP}/lib/bindtextdomain.so:${LD_PRELOAD}
 
   # -- Xkb-Library ---
   XKB_CONFIG_ROOT: ${SNAP}/usr/share/X11/xkb # :${XKB_CONFIG_ROOT} # TODO: also in gnome
-  XKB_LOG_LEVEL: 50
-  XKB_LOG_VERBOSITY: 10
+  # XKB_LOG_LEVEL: 50
+  # XKB_LOG_VERBOSITY: 10
 
   # XKB_DEFAULT_RULES
   # XKB_DEFAULT_MODEL
@@ -48,14 +44,15 @@ environment:
 
   # --- XDG config ---
   XDG_SESSION_TYPE: wayland
-  # XDG_CACHE_HOME:  ${SNAP_USER_COMMON}/.cache
+  XDG_CACHE_HOME:  ${SNAP_USER_COMMON}/.cache
   # XDG_CONFIG_DIRS: ${SNAP}/etc/xdg:$XDG_CONFIG_DIRS
-  # XDG_CONFIG_HOME: ${SNAP_USER_DATA}/.config
+  XDG_CONFIG_HOME: ${SNAP_USER_DATA}/.config
 
   # --- locale ---
   LOCPATH: ${SNAP}/usr/lib/locale:${LOCPATH} # TODO: also in gnome
   XLOCALEDIR: ${SNAP}/usr/share/X11/locale:${XLOCALEDIR} # TODO: also in gnome
 
+  # --- Fonts ---
   FONTCONFIG_FILE: ${SNAP}/etc/fonts/fonts.conf:${FONTCONFIG_FILE} # TODO: also in gnome
   FONTCONFIG_PATH: ${SNAP}/etc/fonts:${FONTCONFIG_PATH} # TODO: also in gnome
 
@@ -92,7 +89,8 @@ environment:
   GST_PLUGIN_SYSTEM_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/gstreamer-1.0:${GST_PLUGIN_SYSTEM_PATH} # TODO: also in gnome
 
   # --- GTK ImLib ---
-  GTK_IM_MODULE_FILE: ${SNAP_USER_COMMON}/.cache/immodules/immodules.cache:${GTK_IM_MODULE_FILE}
+  GTK_IM_MODULE_DIR:  ${SNAP_USER_COMMON}/.cache/immodules  # FIXME: ${XDG_CACHE_HOME}/immodules
+  GTK_IM_MODULE_FILE: ${SNAP_USER_COMMON}/.cache/immodules/immodules.cache
 
   # --- Qt ---
   # QT_DEBUG_PLUGINS: 1
@@ -121,10 +119,12 @@ environment:
 
 apps:
   sway:
+    #command: bin/snapcraft-preload $SNAP/usr/bin/sway
     command: usr/bin/sway
-    # extensions:
-    #   - gnome-3-28
-    # desktop: usr/share/wayland-sessions/sway.desktop
+    #command: glue/startsway
+    extensions:
+      - gnome-3-28
+    desktop: usr/share/wayland-sessions/sway.desktop
   swaybar:
     command: usr/bin/swaybar
     aliases: [ swaybar ]
@@ -173,22 +173,40 @@ plugs:
   login-session-observe:
   home:
   system-observe:
+  mount-observe:
   # gnome:
 
 
   # For GTK3+ ## TODO:
-  gtk-3-themes:
-    interface: content
-    target: $SNAP/data-dir/themes
-    default-provider: gtk-common-themes
-  icon-themes:
-    interface: content
-    target: $SNAP/data-dir/icons
-    default-provider: gtk-common-themes
-  sound-themes:
-    interface: content
-    target: $SNAP/data-dir/sounds
-    default-provider: gtk-common-themes
+  # gtk-3-themes:
+  #   interface: content
+  #   target: $SNAP/data-dir/themes
+  #   default-provider: gtk-common-themes
+  # icon-themes:
+  #   interface: content
+  #   target: $SNAP/data-dir/icons
+  #   default-provider: gtk-common-themes
+  # sound-themes:
+  #   interface: content
+  #   target: $SNAP/data-dir/sounds
+  #   default-provider: gtk-common-themes
+
+  # ----
+  # root:
+  #   interface: content
+  #   target: $SNAP/
+
+  # usr:
+  #   interface: content
+  #   target: $SNAP/usr
+
+  # usr-bin:
+  #   interface: content
+  #   target: $SNAP/usr/bin
+
+  # usr-lib:
+  #   interface: content
+  #   target: $SNAP/usr/lib
 
 
 # passthrough:
@@ -199,8 +217,14 @@ plugs:
 #       symlink: $SNAP/usr/share/fonts
 
 # layout:
-#   ${SNAP}/usr/share/fonts:
-#     symlink: /usr/share/xkb
+#   /usr/bin/xkbcomp:
+#     symlink: $SNAP/usr/bin/xkbcomp
+#   /usr/share/X11:
+#     symlink: $SNAP/usr/share/X11
+#   /usr/share/fonts:
+#     symlink: $SNAP/usr/share/fonts
+  # /dev/shm:
+  #   type: tmpfs
 
 
 build-packages:
@@ -211,6 +235,14 @@ build-packages:
 
 
 parts:
+  snapcraft-preload:
+      source: https://github.com/sergiusens/snapcraft-preload.git
+      plugin: cmake
+      build-packages:
+        - on amd64:
+          - gcc-multilib
+          - g++-multilib
+
   externals:
      plugin: dump
      source: .
@@ -237,7 +269,7 @@ parts:
 
 
   sway:
-    after: [ json-c, wayland-protocols ]
+    after: [ json-c, xwayland ]
     source: https://github.com/swaywm/sway.git
     source-tag: 'v1.2'
     plugin: meson
@@ -259,17 +291,27 @@ parts:
       - -Dlogind-provider=systemd
 
       - -Dexamples=false
+
+      # - -Dwlroots:xdg-dir=true
     override-pull: |
       set -eux
-      snapcraftctl pull
-      mkdir subprojects
-      git clone -b 0.8.1 https://github.com/swaywm/wlroots.git subprojects/wlroots
-      cd subprojects/wlroots
-      git checkout 9796abccedef881e99d293a2658c4da9466acd88
+      snapcraftctl pull      
+      # git clone https://github.com/sd-hd/wlroots.git subprojects/wlroots
+      # git clone -b 0.8.1 https://github.com/swaywm/wlroots.git subprojects/wlroots
+      git clone -b sway-snap-dev https://github.com/sd-hd/wlroots.git subprojects/wlroots
+      # mkdir -p subprojects
+      # cd subprojects/wlroots
+      # git checkout 6bb7639a
+      # git checkout 2a63f4fc61185693c8917b28863eb9739096026f  # d113e48a2a32542fe6e12f1759f07888364609bf
+    # build-snaps:
+    #   - wayland
     build-packages:
       - libcairo2-dev
+      - libdbus-1-dev
+      - libevdev-dev
       - libdrm-dev
       - libpango1.0-dev
+      - libjson-c-dev
       - libgdk-pixbuf2.0-dev
       - libsystemd-dev
       - libcap-dev
@@ -291,6 +333,7 @@ parts:
       - libgles2-mesa-dev
       - libwayland-egl-backend-dev
       - libwayland-dev
+      - libwayland-egl1
     stage-packages:
       - libdrm2
       - libegl1
@@ -384,24 +427,43 @@ parts:
       - i3status
       - i3-wm    ## TODO: find a replacement for i3-config-wizard, and others
       - suckless-tools
+    stage:
+      # - -etc/pam.d 
+      - -usr/share/doc
+      - -usr/share/include
+      - -usr/share/lintian
+      - -usr/share/man
+      - -usr/share/pkgconfig
+      #- -usr/share/xsessions
+
+      # - etc
+      # - usr/bin
+      # - usr/lib
 
 
+  ## TODO: move outside
   qt:
     plugin: nil
     stage-packages:
       - qtwayland5
       - qml-module-qtwayland-compositor
 
+
   x11:
     plugin: nil
     stage-packages:
       # - xwayland
-      - xkb-data
-      - x11-xkb-utils
-      - xfonts-terminus
+      - xkb-data # TODO: is this 
+      - x11-xkb-utils ## INFO: already in xwayland
       - xfonts-utils
+      #
+      - xfonts-terminus
       - xfonts-scalable
       - xfonts-base
+    stage:
+      - -usr/bin/setxkbmap ## TODO: from where does this come ? 
+      - -usr/bin/xkbprint ## TODO: from where does this come ? 
+      - -usr/bin/xkbcomp ## TODO: from where does this come ? 
 
 
   # mesa:
@@ -460,8 +522,17 @@ parts:
         - libnvidia-egl-wayland1
       - on amd64,i386:
         - libdrm-intel1
+    stage:
+      # - -etc/pam.d 
+      - -usr/share/doc
+      - -usr/share/include
+      - -usr/share/lintian
+      - -usr/share/man
+      - -usr/share/pkgconfig
+      - -usr/share/X11/xkb
 
 
+  # INFO: this is now inside of "wayland" snap
   wayland:
     plugin: nil
     stage-packages:
@@ -477,6 +548,26 @@ parts:
       - lxterminal
       - qterminal
       - x11-apps
+
+
+  # xwayland:
+  #   plugin: nil
+  #   stage-snaps:
+  #     - wayland
+  #   # stage:
+  #   prime:
+  #     - etc
+  #     # - lib # FIXME: 
+  #     - usr/bin
+      
+  #     - usr/lib
+  #     - usr/share/locale # FIXME:
+  #     - usr/share/libdrm # TODO: move to other place
+  #     - usr/share/X11 # FIXME:
+
+  #     ## TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  #     - -usr/lib/x86_64-linux-gnu/libxkbcommon.so.0.0.0
+  #     - -usr/share/X11/xkb
 
 
 ## ==========================
@@ -499,7 +590,7 @@ parts:
       # - xvfb
 
   xwayland:
-    after: [ libglvnd ]
+    after: [ libglvnd, wayland-protocols ]
     plugin: meson
     source: https://gitlab.freedesktop.org/xorg/xserver.git
     source-tag: xorg-server-1.20.6
