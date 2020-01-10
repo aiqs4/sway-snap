@@ -2,7 +2,7 @@ name: sway
 # title:
 type: app
 base: core18
-version: '1.2.0-68-0dev2'
+version: '1.2.0-69-0dev2'
 summary: i3-compatible Wayland compositor
 description: |
   Sway is a tiling window manager and Wayland compositor, inspired by i3, and written in C. It is designed as a drop in replacement for i3 using the more modern Wayland display server protocol and wlroots compositor library.
@@ -17,7 +17,6 @@ confinement: strict
 
 environment:
   SHELL: bash
-  #
   # LANG: null
   LC_ALL: C
   # LC_ALL: C.UTF-8
@@ -59,7 +58,6 @@ environment:
   # --- X ---
   XCURSOR_PATH: ${SNAP}/data-dir/icons:${SNAP}/usr/share/icons:${XCURSOR_PATH}  # TODO: also in gnome  # TODO: data-dir ?
 
-
   # --- Prep EGL ---
   __EGL_VENDOR_LIBRARY_DIRS: $SNAP/etc/glvnd/egl_vendor.d:$SNAP/usr/share/glvnd/egl_vendor.d:${__EGL_VENDOR_LIBRARY_DIRS}
   LIBGL_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri:${LIBGL_DRIVERS_PATH} ## TODO: also in gnome
@@ -83,38 +81,10 @@ environment:
   # --- GIO ---
   GIO_MODULE_DIR: ${SNAP_USER_COMMON}/.cache/gio-modules:${GIO_MODULE_DIR}
 
-  # --- Gstreamer ---
-  GST_PLUGIN_PATH: ${SNAP}/lib/x86_64-linux-gnu/gstreamer-1.0:${GST_PLUGIN_PATH}
-  GST_PLUGIN_SCANNER: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/gstreamer1.0/gstreamer-1.0/gst-plugin-scanner:${GST_PLUGIN_SCANNER} # TODO: also in gnome
-  GST_PLUGIN_SYSTEM_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/gstreamer-1.0:${GST_PLUGIN_SYSTEM_PATH} # TODO: also in gnome
-
   # --- GTK ImLib ---
   GTK_IM_MODULE_DIR:  ${SNAP_USER_COMMON}/.cache/immodules  # FIXME: ${XDG_CACHE_HOME}/immodules
   GTK_IM_MODULE_FILE: ${SNAP_USER_COMMON}/.cache/immodules/immodules.cache
 
-  # --- Qt ---
-  # QT_DEBUG_PLUGINS: 1
-  # QTVER: qt5
-  QT_QPA_PLATFORM: wayland-egl  # TODO: does wayland_shm for software-rendering here also exists ?
-  QT_WAYLAND_FORCE_DPI: physical
-  QT_WAYLAND_DISABLE_WINDOWDECORATION: 1
-  QT_QPA_PLATFORM_PLUGIN_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/qt5/plugins:${QT_QPA_PLATFORM_PLUGIN_PATH}
-  #QT_PLUGIN_PATH: $QTDIR/lib/plugins/
-  QT_PLUGIN_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/qt5/plugins:${QT_PLUGIN_PATH} # FIXME: is this needed ?
-  QML2_IMPORT_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/qt5/qml:${QML2_IMPORT_PATH}
-
-  # --- SDL ---
-  SDL_VIDEODRIVER: wayland
-
-  # --- JAVA ---
-  _JAVA_AWT_WM_NONREPARENTING: 1
-
-  # --- Firefox ---
-  MOZ_ENABLE_WAYLAND: 1
-
-  # --- Elementary/EFL ---
-  ECORE_EVAS_ENGINE: wayland_egl  # TODO: or wayland_shm for software-rendering
-  ELM_ENGINE: wayland_egl
 
 
 apps:
@@ -153,13 +123,6 @@ slots:
 
 
 plugs:
-  # TODO: org.a11y.Bus ...
-  ## --- DBUS ---
-  # my-policykit: # org.freedesktop.PolicyKit1.Authority
-  #   bus: session
-  #   interface: dbus
-  #   name: org.freedesktop.PolicyKit1
-
   wayland:
   x11:
   desktop:
@@ -174,55 +137,14 @@ plugs:
   home:
   system-observe:
   mount-observe:
-  # gnome:
 
-
-  # For GTK3+ ## TODO:
-  # gtk-3-themes:
-  #   interface: content
-  #   target: $SNAP/data-dir/themes
-  #   default-provider: gtk-common-themes
-  # icon-themes:
-  #   interface: content
-  #   target: $SNAP/data-dir/icons
-  #   default-provider: gtk-common-themes
-  # sound-themes:
-  #   interface: content
-  #   target: $SNAP/data-dir/sounds
-  #   default-provider: gtk-common-themes
-
-  # ----
-  # root:
-  #   interface: content
-  #   target: $SNAP/
-
-  # usr:
-  #   interface: content
-  #   target: $SNAP/usr
-
-  # usr-bin:
-  #   interface: content
-  #   target: $SNAP/usr/bin
-
-  # usr-lib:
-  #   interface: content
-  #   target: $SNAP/usr/lib
-
-
-# passthrough:
-#   layout: ## TODO: symlinks didn't work if file exist !
-#     /usr/bin/xkbcomp:
-#       symlink: $SNAP/usr/bin/xkbcomp
-#     /usr/share/fonts:
-#       symlink: $SNAP/usr/share/fonts
-
-# layout:
-#   /usr/bin/xkbcomp:
-#     symlink: $SNAP/usr/bin/xkbcomp
-#   /usr/share/X11:
-#     symlink: $SNAP/usr/share/X11
-#   /usr/share/fonts:
-#     symlink: $SNAP/usr/share/fonts
+layout:
+  /usr/bin/xkbcomp:
+    symlink: $SNAP/usr/bin/xkbcomp
+  /usr/share/X11:
+    symlink: $SNAP/usr/share/X11
+  /usr/share/fonts:
+    symlink: $SNAP/usr/share/fonts
   # /dev/shm:
   #   type: tmpfs
 
@@ -292,7 +214,7 @@ parts:
 
       - -Dexamples=false
 
-      # - -Dwlroots:xdg-dir=true
+      - -Dwlroots:xdg_dir=true
     override-pull: |
       set -eux
       snapcraftctl pull      
@@ -421,6 +343,7 @@ parts:
     meson-parameters:
       - --prefix=/usr
 
+
   needed-tools:
     plugin: nil
     stage-packages:
@@ -546,7 +469,6 @@ parts:
     plugin: nil
     stage-packages:
       - lxterminal
-      - qterminal
       - x11-apps
 
 
