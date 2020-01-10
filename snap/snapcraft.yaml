@@ -364,14 +364,6 @@ parts:
       # - usr/lib
 
 
-  ## TODO: move outside
-  qt:
-    plugin: nil
-    stage-packages:
-      - qtwayland5
-      - qml-module-qtwayland-compositor
-
-
   x11:
     plugin: nil
     stage-packages:
