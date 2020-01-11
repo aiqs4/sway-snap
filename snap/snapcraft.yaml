@@ -2,7 +2,7 @@ name: sway
 # title:
 type: app
 base: core18
-version: '1.2.0-69-0dev2'
+version: '1.2.0-70-0dev2'
 summary: i3-compatible Wayland compositor
 description: |
   Sway is a tiling window manager and Wayland compositor, inspired by i3, and written in C. It is designed as a drop in replacement for i3 using the more modern Wayland display server protocol and wlroots compositor library.
@@ -27,19 +27,14 @@ environment:
   LD_LIBRARY_PATH: ${SNAP}/usr/lib:${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}:${SNAP}/lib:${SNAP}/lib/${SNAPCRAFT_ARCH_TRIPLET}:${LD_LIBRARY_PATH}
   PATH: $SNAP/bin:$SNAP/usr/bin:${PATH}
 
-  # TODO: also in gnome
-  LD_PRELOAD: ${SNAP}/lib/bindtextdomain.so:${LD_PRELOAD}
+  SNAPCRAFT_PRELOAD_REDIRECT_ONLY_SHM: 1
+  SNAPCRAFT_PRELOAD: ${SNAP}
+  # LD_PRELOAD: ${SNAP}/lib/libsnapcraft-preload.so:${SNAP}/lib/bindtextdomain.so # TODO: also in gnome
 
   # -- Xkb-Library ---
   XKB_CONFIG_ROOT: ${SNAP}/usr/share/X11/xkb # :${XKB_CONFIG_ROOT} # TODO: also in gnome
   # XKB_LOG_LEVEL: 50
   # XKB_LOG_VERBOSITY: 10
-
-  # XKB_DEFAULT_RULES
-  # XKB_DEFAULT_MODEL
-  # XKB_DEFAULT_LAYOUT
-  # XKB_DEFAULT_VARIANT
-  # XKB_DEFAULT_OPTIONS
 
   # --- XDG config ---
   XDG_SESSION_TYPE: wayland
@@ -138,6 +133,7 @@ plugs:
   system-observe:
   mount-observe:
 
+
 layout:
   /usr/bin/xkbcomp:
     symlink: $SNAP/usr/bin/xkbcomp
@@ -165,6 +161,7 @@ parts:
           - gcc-multilib
           - g++-multilib
 
+
   externals:
      plugin: dump
      source: .
@@ -191,7 +188,7 @@ parts:
 
 
   sway:
-    after: [ json-c, xwayland ]
+    after: [ json-c, wayland-protocols ] ## TODO: optional after xwayland
     source: https://github.com/swaywm/sway.git
     source-tag: 'v1.2'
     plugin: meson
@@ -225,7 +222,7 @@ parts:
       # cd subprojects/wlroots
       # git checkout 6bb7639a
       # git checkout 2a63f4fc61185693c8917b28863eb9739096026f  # d113e48a2a32542fe6e12f1759f07888364609bf
-    # build-snaps:
+    # build-snaps: ## TODO: 
     #   - wayland
     build-packages:
       - libcairo2-dev
@@ -297,6 +294,9 @@ parts:
       - libgdk-pixbuf2.0-bin ## TODO: only for test
     stage:
       - -etc/sway/config
+    # stage-snaps: 
+    #   - dlmenu-wl
+    #   # - wayland
 
 
   swayidle:
@@ -348,7 +348,7 @@ parts:
     plugin: nil
     stage-packages:
       - i3status
-      - i3-wm    ## TODO: find a replacement for i3-config-wizard, and others
+      # - i3-wm    ## TODO: find a replacement for i3-config-wizard, and others
       - suckless-tools
     stage:
       # - -etc/pam.d 
@@ -368,8 +368,8 @@ parts:
     plugin: nil
     stage-packages:
       # - xwayland
-      - xkb-data # TODO: is this 
-      - x11-xkb-utils ## INFO: already in xwayland
+      # - xkb-data # TODO: is this 
+      # - x11-xkb-utils ## INFO: already in xwayland
       - xfonts-utils
       #
       - xfonts-terminus
@@ -381,180 +381,40 @@ parts:
       - -usr/bin/xkbcomp ## TODO: from where does this come ? 
 
 
-  # mesa:
-  #   plugin: nil
-  #   stage-packages:
-  #     - libegl-mesa0
-  #     - libegl1-mesa
-  #     - libgl1-mesa-dri
-  #     - libwayland-egl1-mesa
-  #     - libglu1-mesa
-  #     - mesa-va-drivers
-  #     - mesa-vdpau-drivers
-  #     - mesa-vulkan-drivers
-  #     - libglx-mesa0
-  #     - libglw1-mesa
-
-
-  egl: # TODO: check who needs what ...
+  test-apps:
     plugin: nil
     stage-packages:
-      - libdrm2
-
-      - libglvnd0
-      - libegl1
-      - libvdpau-va-gl1
-      # 
-      - libgl1
-      - libgl2ps1.4
-      - libglx0
-      - libgle3
-      - libgles1
-      - libgles2
-      # - libglew2.1
-
-      - libglbinding2
-
-      - libvdpau1
-      - libva-drm2
-      - vdpau-driver-all
-      - va-driver-all
-      - libxcb-dri2-0
-      - libxcb-dri3-0
-
-      #
-      - libglfw3-wayland
-      - libwayland-egl1
-      # - libwayland-egl++0 ## TODO: not found on core18
-      
-      - try:
-        - libdrm-amdgpu1
-      - try:
-        - libdrm-nouveau2
-      - try:
-        - libdrm-radeon1
-      - try:
-        - libnvidia-egl-wayland1
-      - on amd64,i386:
-        - libdrm-intel1
+      - lxterminal
+      # - x11-apps
     stage:
-      # - -etc/pam.d 
       - -usr/share/doc
       - -usr/share/include
       - -usr/share/lintian
       - -usr/share/man
       - -usr/share/pkgconfig
       - -usr/share/X11/xkb
-
-
-  # INFO: this is now inside of "wayland" snap
-  wayland:
-    plugin: nil
-    stage-packages:
-      - libwayland-egl1 # | libwayland-egl1-mesa
-      - libwayland-client0
-      - libwayland-cursor0
-      - libwayland-server0
-
-
-  test-apps:
-    plugin: nil
-    stage-packages:
-      - lxterminal
-      - x11-apps
-
-
-  # xwayland:
-  #   plugin: nil
-  #   stage-snaps:
-  #     - wayland
-  #   # stage:
-  #   prime:
-  #     - etc
-  #     # - lib # FIXME: 
-  #     - usr/bin
-      
-  #     - usr/lib
-  #     - usr/share/locale # FIXME:
-  #     - usr/share/libdrm # TODO: move to other place
-  #     - usr/share/X11 # FIXME:
-
-  #     ## TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  #     - -usr/lib/x86_64-linux-gnu/libxkbcommon.so.0.0.0
-  #     - -usr/share/X11/xkb
-
-
-## ==========================
-## Testing Xwayland packages
-## ==========================
-  libglvnd: # TODO: maybe this could be used earlier for other packages ...
-    ## TODO: this is libgl1, libglx0 and libglvnd0
-    plugin: autotools
-    source: https://github.com/NVIDIA/libglvnd.git
-    source-tag: v1.2.0
-    configflags:
-      - --prefix=/usr
-    build-packages:
-      - libx11-dev
-      - libxext-dev
-      # - python-dev
-      # - python-libxml2
-      # - x11proto-gl-dev
-      # - xauth
-      # - xvfb
+    
 
   xwayland:
-    after: [ libglvnd, wayland-protocols ]
-    plugin: meson
-    source: https://gitlab.freedesktop.org/xorg/xserver.git
-    source-tag: xorg-server-1.20.6
-    build-environment:
-      - CFLAGS: "-DDEBUG"
-      - CPPFLAGS: "-DDEBUG"
-    meson-parameters:
-      - --prefix=/usr
-      - --buildtype=debug
-      # - --udev=true
-      # - -Dxkb_dir=share/X11/xkb
-      # - -Dxkb-output_dir=/tmp/x11/compiled # FIXME: find better place ! orignal is share/X11/xkb/compiled
-      - -Dxorg=false
-      - -Dxephyr=false
-      - -Dxwayland=true
-      - -Dglamor=true
-      - -Dxwayland_eglstream=false # TODO:
-      - -Dxnest=false
-      - -Ddmx=false
-      - -Dxvfb=false
-      - -Dxwin=false
-      #
-      - -Dxdmcp=false
-      # - -Dxdm-auth-1=true
-      # - -Dsecure-rpc=true
-      # - -Dipv6=auto
-      # ...
-      - -Dhal=false # FIXME: is too old ?
-      # ...
-      - -Dscreensaver=false
-      # ...
-      ## TODO: FIXME: more options ?
-    build-packages:
-      #- libxcb-xkb-dev
-      #- libxcb-glx0-dev
-      - libxkbfile-dev
-      # - xkb-data
-      # - x11-xkb-utils
-      - libbsd-dev
-      # - xfonts-utils
-      - libxfont-dev
-      - libdbus-1-dev
-      - libdrm-dev
-      - libepoxy-dev
-      - libgbm-dev
-      # - libtirpc-dev ## TODO: check ?
-      - nettle-dev
+    plugin: nil
+    stage-snaps:
+      - wayland/latest/beta
+    stage:
+      - -usr/share/include
+      - -usr/share/pkgconfig
+      - -usr/share/wayland-protocols ## TODO: fix pkgconfig paths here
+      - -usr/share/X11/xkb
+    # prime:
+    #   - etc
+    #   # - lib # FIXME: 
+    #   - usr/bin
+      
+    #   - usr/lib
+    #   - usr/share/locale # FIXME:
+    #   - usr/share/libdrm # TODO: move to other place
+    #   - usr/share/X11 # FIXME:
 
-      - x11-xkb-utils
-      - xfonts-utils
-    stage-packages:
-      - libfontenc1
-      - libxfont2
+    #   ## TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    #   - -usr/lib/x86_64-linux-gnu/libxkbcommon.so.0.0.0
+      
+
