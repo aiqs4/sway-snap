@@ -2,10 +2,11 @@
 
 set -ex
 
-# Setup DBUS
-# sudo snap connect sway:my-login
-# sudo snap connect sway:my-policykit
-# sudo snap connect sway:my-systemd1
+sudo snap connect sway:display-control
+sudo snap connect sway:framebuffer
+
+sudo snap connect sway:wayland
+sudo snap connect sway:x11
 
 # Add Hardware-Observe
 sudo snap connect sway:hardware-observe 
@@ -23,9 +24,12 @@ sudo snap connect sway:login-session-observe
 # Allow to session control
 sudo snap connect sway:login-session-control
 
-
+# For global config
+if [ ! -e "/etc/sway" ] ; then
+    sudo ln -s /snap/sway/current/etc/sway /etc/sway
+fi
 
 # For DisplayManager
 if [ -d "/usr/share/wayland-sessions/" ] ; then
-  sudo ln -s /snap/sway/current/usr/share/wayland-sessions/sway.desktop /usr/share/wayland-sessions/sway.desktop
+    sudo ln -s /snap/sway/current/usr/share/wayland-sessions/sway.desktop /usr/share/wayland-sessions/sway.desktop
 fi
