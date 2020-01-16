@@ -137,6 +137,8 @@ plugs:
 
 
 layout:
+  /etc/sway:
+    symlink: $SNAP/etc/sway
   /usr/bin/xkbcomp:
     symlink: $SNAP/usr/bin/xkbcomp
   /usr/share/X11:
@@ -378,28 +380,14 @@ parts:
     stage-packages: 
       - ltrace
 
-  x11:
-    plugin: nil
-    stage-packages:
-      # - xwayland
-      # - xkb-data # TODO: is this 
-      # - x11-xkb-utils ## INFO: already in xwayland
-      - xfonts-utils
-      #
-      - xfonts-terminus
-      - xfonts-scalable
-      - xfonts-base
-    stage:
-      - -usr/bin/setxkbmap ## TODO: from where does this come ? 
-      - -usr/bin/xkbprint ## TODO: from where does this come ? 
-      - -usr/bin/xkbcomp ## TODO: from where does this come ? 
-
 
   test-apps:
     plugin: nil
     stage-packages:
-      - lxterminal
-      # - x11-apps
+    # - lxterminal
+    # - x11-apps
+      - sakura
+      - lilyterm
     stage-snaps:
       - termite/latest/candidate
     stage:

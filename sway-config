@@ -14,8 +14,8 @@ set $down j
 set $up k
 set $right l
 # Your preferred terminal emulator
-set $term termite
-set $term2 DISPLAY= lxterminal
+set $term DISPLAY= lilyterm
+set $term2 termite
 # Your preferred application launcher
 # Note: it's recommended that you pass the final command to sway
 set $menu dmenu-wl_path | dmenu-wl | xargs swaymsg exec --
