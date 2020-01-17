@@ -266,12 +266,12 @@ parts:
       - libwayland-dev
       - libwayland-egl1
     stage-packages:
-      - libdrm2
-      - libegl1
+      # - libdrm2  # INFO: comes from (x)wayland
+      # - libegl1  # INFO: comes from (x)wayland
       - libevdev2
-      - libgbm1
-      - libgles2
-      - libglvnd0
+      # - libgbm1  # INFO: comes from (x)wayland
+      # - libgles2 # INFO: comes from (x)wayland
+      # - libglvnd0 # INFO: comes from (x)wayland
       - libgudev-1.0-0
       - libinput10
       - libmtdev1
