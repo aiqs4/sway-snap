@@ -1,14 +1,23 @@
 #!/bin/bash
 
-set -ex
+# set -ex
+
+exec >> /tmp/sway.log
+
+exec 2>> /tmp/sway.log
+
+set -x
 
 echo "$(date) > Enter: install-hook " >> /tmp/sway-hook.log
 
-[ ! -d "${SNAP_USER_DATA}/.config/sway" ] && mkdir -p -m 770 ${SNAP_USER_DATA}/.config/sway
+ln -s /etc/sway ${SNAP}/etc/sway
 
-if [ -e ${SNAP}/etc/sway/config ] ; then
-  cp -n ${SNAP}/etc/sway/config ${SNAP_USER_DATA}/.config/sway
-fi
+set
+
+# [ ! -d "${SNAP_USER_DATA}/.config/sway" ] && mkdir -p -m 770 ${SNAP_USER_DATA}/.config/sway
+# if [ -e ${SNAP}/etc/sway/config ] ; then
+#   cp -n ${SNAP}/etc/sway/config ${SNAP_USER_DATA}/.config/sway
+# fi
 
 
 echo "$(date) < Leave: install-hook " >> /tmp/sway-hook.log

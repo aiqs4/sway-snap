@@ -2,7 +2,7 @@ name: sway
 # title:
 type: app
 base: core18
-version: '1.2.0-77-0dev2'
+version: '1.3.0-1'
 summary: i3-compatible Wayland compositor
 description: |
   Sway is a tiling window manager and Wayland compositor, inspired by i3, and written in C. It is designed as a drop in replacement for i3 using the more modern Wayland display server protocol and wlroots compositor library.
@@ -202,7 +202,7 @@ parts:
   sway:
     after: [ json-c, wayland-protocols ] ## TODO: optional after xwayland
     source: https://github.com/swaywm/sway.git
-    source-tag: 'v1.2'
+    source-tag: 'v1.3'
     plugin: meson
     meson-version: 0.52.0
     source-depth: 1
@@ -227,13 +227,7 @@ parts:
     override-pull: |
       set -eux
       snapcraftctl pull      
-      # git clone https://github.com/sd-hd/wlroots.git subprojects/wlroots
-      # git clone -b 0.8.1 https://github.com/swaywm/wlroots.git subprojects/wlroots
-      git clone -b sway-snap-dev https://github.com/sd-hd/wlroots.git subprojects/wlroots
-      # mkdir -p subprojects
-      # cd subprojects/wlroots
-      # git checkout 6bb7639a
-      # git checkout 2a63f4fc61185693c8917b28863eb9739096026f  # d113e48a2a32542fe6e12f1759f07888364609bf
+      git clone -b 0.9.1 https://github.com/swaywm/wlroots.git subprojects/wlroots
     # build-snaps: ## TODO: 
     #   - wayland
     build-packages:

@@ -4,6 +4,8 @@ set -ex
 
 echo "$(date) > Enter: post-refresh-hook " >> /tmp/sway-hook.log
 
+set >> /tmp/sway-hook.log
+
 [ ! -d "${SNAP_USER_DATA}/.config/sway" ] && mkdir -p -m 770 ${SNAP_USER_DATA}/.config/sway
 
 if [ -e ${SNAP}/etc/sway/config ] ; then
