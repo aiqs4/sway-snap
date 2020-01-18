@@ -2,15 +2,13 @@ name: sway
 # title:
 type: app
 base: core18
-version: '1.3.0-1'
+version: '1.3.0-2'
 summary: i3-compatible Wayland compositor
 description: |
   Sway is a tiling window manager and Wayland compositor, inspired by i3, and written in C. It is designed as a drop in replacement for i3 using the more modern Wayland display server protocol and wlroots compositor library.
 # license:
 
 # icon: sway.png
-
-# adopt-info: devmode # use 'strict' once you have the right plugs and slots
 
 grade: stable
 confinement: strict
@@ -29,65 +27,39 @@ environment:
 
   SNAPCRAFT_PRELOAD_REDIRECT_ONLY_SHM: 1
   SNAPCRAFT_PRELOAD: ${SNAP}
-  LD_PRELOAD: ${SNAP}/lib/libsnapcraft-preload.so #:${SNAP}/lib/bindtextdomain.so # TODO: also in gnome
-  # LD_PRELOAD: ${SNAP}/lib/libsnapcraft-preload.so
+  LD_PRELOAD: ${SNAP}/lib/libsnapcraft-preload.so
 
   # -- Xkb-Library ---
-  XKB_CONFIG_ROOT: ${SNAP}/usr/share/X11/xkb # :${XKB_CONFIG_ROOT} # TODO: also in gnome
+  # XKB_CONFIG_ROOT: ${SNAP}/usr/share/X11/xkb # :${XKB_CONFIG_ROOT} # TODO: also in gnome
   # XKB_LOG_LEVEL: 50
   # XKB_LOG_VERBOSITY: 10
 
   # --- XDG config ---
-  XDG_SESSION_TYPE: wayland
-  XDG_CACHE_HOME:  ${SNAP_USER_COMMON}/.cache
-  # XDG_CONFIG_DIRS: ${SNAP}/etc/xdg:$XDG_CONFIG_DIRS
-  XDG_CONFIG_HOME: ${SNAP_USER_DATA}/.config
-
-  # --- locale ---
-  LOCPATH: ${SNAP}/usr/lib/locale:${LOCPATH} # TODO: also in gnome
-  XLOCALEDIR: ${SNAP}/usr/share/X11/locale:${XLOCALEDIR} # TODO: also in gnome
-
-  # --- Fonts ---
-  FONTCONFIG_FILE: ${SNAP}/etc/fonts/fonts.conf:${FONTCONFIG_FILE} # TODO: also in gnome
-  FONTCONFIG_PATH: ${SNAP}/etc/fonts:${FONTCONFIG_PATH} # TODO: also in gnome
-
-  # --- X ---
-  XCURSOR_PATH: ${SNAP}/data-dir/icons:${SNAP}/usr/share/icons:${XCURSOR_PATH}  # TODO: also in gnome  # TODO: data-dir ?
+  # XDG_SESSION_TYPE: wayland
 
   # --- Prep EGL ---
   __EGL_VENDOR_LIBRARY_DIRS: $SNAP/etc/glvnd/egl_vendor.d:$SNAP/usr/share/glvnd/egl_vendor.d:${__EGL_VENDOR_LIBRARY_DIRS}
-  LIBGL_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri:${LIBGL_DRIVERS_PATH} ## TODO: also in gnome
-  LIBVA_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri:${LIBVA_DRIVERS_PATH}
+  # LIBGL_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri:${LIBGL_DRIVERS_PATH} ## TODO: also in gnome
+  # LIBVA_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri:${LIBVA_DRIVERS_PATH} ## TODO: also in gnome
   # TODO: FIXME: special case for nvidia: https://github.com/plars/stellarium-snap/pull/2/files
 
   # --- Prep GDK, GTK, Clutter ---
-  GDK_BACKEND: wayland
-  CLUTTER_BACKEND: wayland
-
-  # GDK_PIXBUF_BINARY_VERSION: '2.10.0' # FIXME: how to get this from installed version ?
-  GDK_PIXBUF_MODULEDIR: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/gdk-pixbuf-2.0/${GDK_PIXBUF_BINARY_VERSION}/loaders:${GDK_PIXBUF_MODULEDIR}  # TODO: also in gnome
-  # # with: gdk-pixbuf-query-loaders > $libdir/gdk-pixbuf-2.0/$binary_version/loaders.cache
-  # GDK_PIXBUF_MODULE_FILE: ${SNAP_USER_COMMON}/gdk-pixbuf-2.0/${GDK_PIXBUF_BINARY_VERSION}/loaders.cache
-
-  GTK_PATH: ${SNAP}/usr/lib/$ARCH/gtk-3.0:${GTK_PATH}:${GTK_PATH} # TODO: also in gnome
-
-  # --- Gobject introspection ---
-  GI_TYPELIB_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/girepository-1.0:${GI_TYPELIB_PATH} # TODO: also in gnome
-
-  # --- GIO ---
-  GIO_MODULE_DIR: ${SNAP_USER_COMMON}/.cache/gio-modules:${GIO_MODULE_DIR}
+  # GDK_BACKEND: wayland
+  # CLUTTER_BACKEND: wayland
+  # QT_QPA_PLATFORM: wayland-egl
 
   # --- GTK ImLib ---
-  GTK_IM_MODULE_DIR:  ${SNAP_USER_COMMON}/.cache/immodules  # FIXME: ${XDG_CACHE_HOME}/immodules
-  GTK_IM_MODULE_FILE: ${SNAP_USER_COMMON}/.cache/immodules/immodules.cache
+  # GTK_IM_MODULE_DIR:  ${SNAP_USER_COMMON}/.cache/immodules  # FIXME: ${XDG_CACHE_HOME}/immodules
+  # GTK_IM_MODULE_FILE: ${SNAP_USER_COMMON}/.cache/immodules/immodules.cache
 
 
 
 apps:
   sway:
-    #command: LD_PRELOAD=${SNAP}/lib/libsnapcraft-preload.so sway -V -d
-    #command: bin/snapcraft-preload $SNAP/usr/bin/sway -V -d
+    # command: LD_PRELOAD=${SNAP}/lib/libsnapcraft-preload.so sway -V -d
+    # command: bin/snapcraft-preload $SNAP/usr/bin/sway -V -d
     command: usr/bin/sway
+    # command: desktop-launch snapcraft-preload $SNAP/usr/bin/sway
     #command: glue/startsway
     extensions:
       - gnome-3-28
@@ -137,17 +109,10 @@ plugs:
 
 
 layout:
-  # /etc/sway:
-  #   symlink: $SNAP/etc/sway
   /usr/bin/xkbcomp:
     symlink: $SNAP/usr/bin/xkbcomp
   /usr/share/X11:
     symlink: $SNAP/usr/share/X11
-  # /usr/share/fonts:
-  #   symlink: $SNAP/usr/share/fonts
-  # $SNAP/usr/share/fonts:
-  #   bind: /usr/share/fonts
-  
 
 
 build-packages:
@@ -382,8 +347,8 @@ parts:
     # - x11-apps
       - sakura
       - lilyterm
-    stage-snaps:
-      - termite/latest/candidate
+    # stage-snaps:
+    #   - termite/latest/candidate
     stage:
       - -usr/share/doc
       - -usr/share/include
