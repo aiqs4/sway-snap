@@ -20,10 +20,7 @@ environment:
   # LC_ALL: C.UTF-8
 
   # --- Snap compatibality ---
-  SNAPCRAFT_ARCH_TRIPLET: ${SNAPCRAFT_ARCH_TRIPLET} # FIXME: how to get this, on runtime ? e. g. gcc -dumpmachine
-
-  LD_LIBRARY_PATH: ${SNAP}/usr/lib:${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}:${SNAP}/lib:${SNAP}/lib/${SNAPCRAFT_ARCH_TRIPLET}:${LD_LIBRARY_PATH}
-  PATH: $SNAP/bin:$SNAP/usr/bin:${PATH}
+  # SNAPCRAFT_ARCH_TRIPLET: ${SNAPCRAFT_ARCH_TRIPLET} # FIXME: how to get this, on runtime ? e. g. gcc -dumpmachine
 
   SNAPCRAFT_PRELOAD_REDIRECT_ONLY_SHM: 1
   SNAPCRAFT_PRELOAD: ${SNAP}
@@ -31,27 +28,17 @@ environment:
 
   # -- Xkb-Library ---
   # XKB_CONFIG_ROOT: ${SNAP}/usr/share/X11/xkb # :${XKB_CONFIG_ROOT} # TODO: also in gnome
-  # XKB_LOG_LEVEL: 50
-  # XKB_LOG_VERBOSITY: 10
 
   # --- XDG config ---
   # XDG_SESSION_TYPE: wayland
 
   # --- Prep EGL ---
   __EGL_VENDOR_LIBRARY_DIRS: $SNAP/etc/glvnd/egl_vendor.d:$SNAP/usr/share/glvnd/egl_vendor.d:${__EGL_VENDOR_LIBRARY_DIRS}
-  # LIBGL_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri:${LIBGL_DRIVERS_PATH} ## TODO: also in gnome
-  # LIBVA_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri:${LIBVA_DRIVERS_PATH} ## TODO: also in gnome
-  # TODO: FIXME: special case for nvidia: https://github.com/plars/stellarium-snap/pull/2/files
 
   # --- Prep GDK, GTK, Clutter ---
   # GDK_BACKEND: wayland
   # CLUTTER_BACKEND: wayland
   # QT_QPA_PLATFORM: wayland-egl
-
-  # --- GTK ImLib ---
-  # GTK_IM_MODULE_DIR:  ${SNAP_USER_COMMON}/.cache/immodules  # FIXME: ${XDG_CACHE_HOME}/immodules
-  # GTK_IM_MODULE_FILE: ${SNAP_USER_COMMON}/.cache/immodules/immodules.cache
-
 
 
 apps:
@@ -146,14 +133,14 @@ parts:
        sway-config: etc/sway/config
 
 
-  wayland-protocols:
-    source: https://gitlab.freedesktop.org/wayland/wayland-protocols.git
-    source-tag: '1.18'
-    source-depth: 1
-    plugin: autotools
-    configflags: [ --prefix=/usr ]
-    build-packages:
-      - libwayland-bin
+  # wayland-protocols:
+  #   source: https://gitlab.freedesktop.org/wayland/wayland-protocols.git
+  #   source-tag: '1.18'
+  #   source-depth: 1
+  #   plugin: autotools
+  #   configflags: [ --prefix=/usr ]
+  #   build-packages:
+  #     - libwayland-bin
 
 
   json-c:
@@ -165,11 +152,11 @@ parts:
 
 
   sway:
-    after: [ json-c, wayland-protocols ] ## TODO: optional after xwayland
+    after: [ json-c ] #, wayland-protocols ] ## TODO: optional after xwayland
     source: https://github.com/swaywm/sway.git
     source-tag: 'v1.3'
     plugin: meson
-    meson-version: 0.52.0
+    meson-version: 0.53.0
     source-depth: 1
     meson-parameters:
       - --prefix=/usr
@@ -188,13 +175,17 @@ parts:
 
       - -Dexamples=false
 
-      - -Dwlroots:xdg_dir=true
-    override-pull: |
-      set -eux
-      snapcraftctl pull      
-      git clone -b 0.9.1 https://github.com/swaywm/wlroots.git subprojects/wlroots
-    # build-snaps: ## TODO: 
+    #  - -Dwlroots:xdg_dir=true
+    # override-pull: |
+    #   set -eux
+    #   snapcraftctl pull      
+    #   git clone -b 0.9.1 https://github.com/swaywm/wlroots.git subprojects/wlroots
+    # override-build: |
+    #   set
+    #   snapcraftctl build
+    build-snaps: ## TODO: 
     #   - wayland
+        - wlroots/latest/edge
     build-packages:
       - libcairo2-dev
       - libdbus-1-dev
@@ -221,9 +212,9 @@ parts:
       - libpam0g-dev
       - libegl1-mesa-dev
       - libgles2-mesa-dev
-      - libwayland-egl-backend-dev
-      - libwayland-dev
-      - libwayland-egl1
+      # - libwayland-egl-backend-dev
+      # - libwayland-dev
+      # - libwayland-egl1
     stage-packages:
       # - libdrm2  # INFO: comes from (x)wayland
       # - libegl1  # INFO: comes from (x)wayland
@@ -263,6 +254,8 @@ parts:
       - libxrender1
       - libgdk-pixbuf2.0-0
       - libgdk-pixbuf2.0-bin ## TODO: only for test
+    stage-snaps:
+      - wlroots/latest/edge
     stage:
       - -etc/sway/config
     # stage-snaps: 
@@ -346,7 +339,7 @@ parts:
     # - lxterminal
     # - x11-apps
       - sakura
-      - lilyterm
+    #  - lilyterm
     # stage-snaps:
     #   - termite/latest/candidate
     stage:
