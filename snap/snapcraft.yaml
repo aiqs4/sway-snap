@@ -2,7 +2,7 @@ name: sway
 # title:
 type: app
 base: core18
-version: '1.3.0-2'
+version: '1.3.0-2-0classic2'
 summary: i3-compatible Wayland compositor
 description: |
   Sway is a tiling window manager and Wayland compositor, inspired by i3, and written in C. It is designed as a drop in replacement for i3 using the more modern Wayland display server protocol and wlroots compositor library.
@@ -11,7 +11,7 @@ description: |
 # icon: sway.png
 
 grade: stable
-confinement: strict
+confinement: classic
 
 environment:
   SHELL: bash
@@ -19,50 +19,17 @@ environment:
   LC_ALL: C
   # LC_ALL: C.UTF-8
 
-  # --- Snap compatibality ---
-  SNAPCRAFT_ARCH_TRIPLET: ${SNAPCRAFT_ARCH_TRIPLET} # FIXME: how to get this, on runtime ? e. g. gcc -dumpmachine
-
-  LD_LIBRARY_PATH: ${SNAP}/usr/lib:${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}:${SNAP}/lib:${SNAP}/lib/${SNAPCRAFT_ARCH_TRIPLET}:${LD_LIBRARY_PATH}
-  PATH: $SNAP/bin:$SNAP/usr/bin:${PATH}
-
-  SNAPCRAFT_PRELOAD_REDIRECT_ONLY_SHM: 1
-  SNAPCRAFT_PRELOAD: ${SNAP}
-  LD_PRELOAD: ${SNAP}/lib/libsnapcraft-preload.so
-
-  # -- Xkb-Library ---
-  # XKB_CONFIG_ROOT: ${SNAP}/usr/share/X11/xkb # :${XKB_CONFIG_ROOT} # TODO: also in gnome
-  # XKB_LOG_LEVEL: 50
-  # XKB_LOG_VERBOSITY: 10
-
-  # --- XDG config ---
-  # XDG_SESSION_TYPE: wayland
-
-  # --- Prep EGL ---
-  __EGL_VENDOR_LIBRARY_DIRS: $SNAP/etc/glvnd/egl_vendor.d:$SNAP/usr/share/glvnd/egl_vendor.d:${__EGL_VENDOR_LIBRARY_DIRS}
-  # LIBGL_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri:${LIBGL_DRIVERS_PATH} ## TODO: also in gnome
-  # LIBVA_DRIVERS_PATH: ${SNAP}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri:${LIBVA_DRIVERS_PATH} ## TODO: also in gnome
-  # TODO: FIXME: special case for nvidia: https://github.com/plars/stellarium-snap/pull/2/files
-
   # --- Prep GDK, GTK, Clutter ---
-  # GDK_BACKEND: wayland
-  # CLUTTER_BACKEND: wayland
-  # QT_QPA_PLATFORM: wayland-egl
-
-  # --- GTK ImLib ---
-  # GTK_IM_MODULE_DIR:  ${SNAP_USER_COMMON}/.cache/immodules  # FIXME: ${XDG_CACHE_HOME}/immodules
-  # GTK_IM_MODULE_FILE: ${SNAP_USER_COMMON}/.cache/immodules/immodules.cache
-
+  GDK_BACKEND: wayland
+  CLUTTER_BACKEND: wayland
+  QT_QPA_PLATFORM: wayland-egl
 
 
 apps:
   sway:
-    # command: LD_PRELOAD=${SNAP}/lib/libsnapcraft-preload.so sway -V -d
-    # command: bin/snapcraft-preload $SNAP/usr/bin/sway -V -d
     command: usr/bin/sway
-    # command: desktop-launch snapcraft-preload $SNAP/usr/bin/sway
-    #command: glue/startsway
-    extensions:
-      - gnome-3-28
+    # extensions:
+    #   - gnome-3-28
     desktop: usr/share/wayland-sessions/sway.desktop
   swaybar:
     command: usr/bin/swaybar
@@ -103,12 +70,11 @@ plugs:
   locale-control:
   login-session-control:
   login-session-observe:
-  home:
-  system-observe:
-  mount-observe:
 
 
 layout:
+  /etc/sway:
+    symlink: $SNAP/etc/sway
   /usr/bin/xkbcomp:
     symlink: $SNAP/usr/bin/xkbcomp
   /usr/share/X11:
@@ -158,7 +124,6 @@ parts:
 
   json-c:
     source: https://github.com/json-c/json-c.git
-    # source-tag: json-c-0.13.1-20180305
     source-depth: 1
     plugin: autotools
     configflags: [ --prefix=/usr ]
@@ -169,7 +134,7 @@ parts:
     source: https://github.com/swaywm/sway.git
     source-tag: 'v1.3'
     plugin: meson
-    meson-version: 0.52.0
+    meson-version: 0.53.0
     source-depth: 1
     meson-parameters:
       - --prefix=/usr
@@ -187,14 +152,10 @@ parts:
       - -Dlogind-provider=systemd
 
       - -Dexamples=false
-
-      - -Dwlroots:xdg_dir=true
     override-pull: |
       set -eux
       snapcraftctl pull      
       git clone -b 0.9.1 https://github.com/swaywm/wlroots.git subprojects/wlroots
-    # build-snaps: ## TODO: 
-    #   - wayland
     build-packages:
       - libcairo2-dev
       - libdbus-1-dev
@@ -263,6 +224,8 @@ parts:
       - libxrender1
       - libgdk-pixbuf2.0-0
       - libgdk-pixbuf2.0-bin ## TODO: only for test
+    # stage-snaps:
+    #   - wlroots/latest/edge
     stage:
       - -etc/sway/config
     # stage-snaps: 
@@ -321,63 +284,16 @@ parts:
       - i3status
       # - i3-wm    ## TODO: find a replacement for i3-config-wizard, and others
       - suckless-tools
+      - xwayland
     stage:
-      # - -etc/pam.d 
+      # - -etc/pam.d
       - -usr/share/doc
       - -usr/share/include
       - -usr/share/lintian
       - -usr/share/man
       - -usr/share/pkgconfig
       #- -usr/share/xsessions
-
       # - etc
       # - usr/bin
       # - usr/lib
-
-  debug:
-    plugin: nil
-    stage-packages: 
-      - ltrace
-
-
-  test-apps:
-    plugin: nil
-    stage-packages:
-    # - lxterminal
-    # - x11-apps
-      - sakura
-      - lilyterm
-    # stage-snaps:
-    #   - termite/latest/candidate
-    stage:
-      - -usr/share/doc
-      - -usr/share/include
-      - -usr/share/lintian
-      - -usr/share/man
-      - -usr/share/pkgconfig
-      - -usr/share/X11/xkb
-
-
-  xwayland:
-    plugin: nil
-    stage-snaps:
-      - wayland/latest/beta
-    stage:
-      - -usr/share/include
-      - -usr/share/pkgconfig
-      - -usr/share/wayland-protocols ## TODO: fix pkgconfig paths here
-      - -usr/share/X11/xkb
-    # prime:
-    #   - etc
-    #   # - lib # FIXME: 
-    #   - usr/bin
-      
-    #   - usr/lib
-    #   - usr/share/locale # FIXME:
-    #   - usr/share/libdrm # TODO: move to other place
-    #   - usr/share/X11 # FIXME:
-
-    #   ## TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    #   - -usr/lib/x86_64-linux-gnu/libxkbcommon.so.0.0.0
-      
 
