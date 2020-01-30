@@ -1,7 +1,7 @@
 name: sway
 # title:
 type: app
-base: core18
+base: core20
 version: '1.3.0-2'
 summary: i3-compatible Wayland compositor
 description: |
@@ -46,10 +46,9 @@ apps:
     # command: LD_PRELOAD=${SNAP}/lib/libsnapcraft-preload.so sway -V -d
     # command: bin/snapcraft-preload $SNAP/usr/bin/sway -V -d
     command: usr/bin/sway
-    # command: desktop-launch snapcraft-preload $SNAP/usr/bin/sway
-    #command: glue/startsway
     extensions:
       - gnome-3-28
+      - opengl
     desktop: usr/share/wayland-sessions/sway.desktop
   swaybar:
     command: usr/bin/swaybar
