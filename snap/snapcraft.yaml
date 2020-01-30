@@ -2,7 +2,7 @@ name: sway
 # title:
 type: app
 base: core20
-version: '1.3.0-2'
+version: git
 summary: i3-compatible Wayland compositor
 description: |
   Sway is a tiling window manager and Wayland compositor, inspired by i3, and written in C. It is designed as a drop in replacement for i3 using the more modern Wayland display server protocol and wlroots compositor library.
