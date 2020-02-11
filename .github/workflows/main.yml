@@ -20,7 +20,7 @@ jobs:
           string: ${{ github.ref }}
           replace-with: ''
 
-      - uses: jhenstridge/snapcraft-build-action@v1
+      - uses: sd-hd/snapcraft-build-action@v1
         id: snapcraft
 
       - name: Create Release
